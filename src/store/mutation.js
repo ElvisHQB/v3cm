@@ -1,3 +1,9 @@
-/**
- * Created by lichenglong on 2018/1/17.
- */
+import * as types from './mutation-types'
+
+const mutations = {
+  [types.SET_USER_INFO] (state, userInfo) {
+    state.userInfo = userInfo
+  }
+}
+
+export default mutations

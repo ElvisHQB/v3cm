@@ -1,3 +1,1 @@
-/**
- * Created by lichenglong on 2018/1/17.
- */
+export const SET_USER_INFO = 'SET_USER_INFO'

@@ -1,6 +1,6 @@
-const userLoginStatus = ''
-const sessionid = ''
-const userInfo = {
+export const userLoginStatus = ''
+export const sessionid = ''
+export const userInfo = {
   // crmId: 2693416,
   // department: '',
   // email: 'clli.leoric@wind.com.cn',
@@ -17,9 +17,9 @@ const userInfo = {
   // title: '',
   // whiteListFlag: false
 }
-const userImage = []
-const currentPage = 'newestMeeting'
-const meetingInfo = {
+export const userImage = []
+export const currentPage = 'newestMeeting'
+export const meetingInfo = {
 }
-const partnersInfo = {
+export const partnersInfo = {
 }

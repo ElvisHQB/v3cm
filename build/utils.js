@@ -29,9 +29,17 @@ exports.cssLoaders = function (options) {
     }
   }
 
+  //假设设计稿的宽度为750px
+  const px2remLoader = {
+    loader: 'px2rem-loader',
+    options: {
+      remUnit: 37.5
+    }
+  }
+
   // generate loader string to be used with extract text plugin
   function generateLoaders (loader, loaderOptions) {
-    const loaders = options.usePostCSS ? [cssLoader, postcssLoader] : [cssLoader]
+    const loaders = options.usePostCSS ? [cssLoader, px2remLoader, postcssLoader] : [cssLoader, px2remLoader]
 
     if (loader) {
       loaders.push({
@@ -59,7 +67,7 @@ exports.cssLoaders = function (options) {
     css: generateLoaders(),
     postcss: generateLoaders(),
     less: generateLoaders('less'),
-    sass: generateLoaders('sass', { indentedSyntax: true }),
+    sass: generateLoaders('sass', {indentedSyntax: true}),
     scss: generateLoaders('sass'),
     stylus: generateLoaders('stylus'),
     styl: generateLoaders('stylus')
