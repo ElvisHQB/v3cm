@@ -5,6 +5,9 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '../../api/fetchData'
+  import {HOST} from '../../api/config'
+  import * as ERR_CODE from '../../api/errorCode'
   export default {
     name: 'newestMeeting',
     data () {
@@ -14,6 +17,7 @@
     },
     mounted () {
       this._test()
+      this._getList()
     },
     computed: {
     },
@@ -23,6 +27,20 @@
           let t = '上的福克斯减肥路上的减肥速度快就'
           this.test.push(t)
         }
+      },
+      _getList () {
+        const url = HOST + '/getLatestMeeting.json'
+        return api.getData(url, 'post', {
+          criteria: {
+            meetingStatus: ['PUBLISHED', 'STARTED']
+          },
+          isPaging: false
+        }).then((res) => {
+          console.log(res)
+        }).catch((e) => {
+          console.log(e)
+          console.log(ERR_CODE)
+        })
       }
     }
   }
