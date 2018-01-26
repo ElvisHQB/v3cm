@@ -6,18 +6,19 @@
         <router-view></router-view>
       </keep-alive>
     </div>
+    <player class="ali-player"></player>
     <tab class="tab"></tab>
   </div>
 </template>
 
 <script>
+  import Player from 'base/player/player'
   import * as ERR_CODE from 'api/errorCode'
-  import { HOST } from './api/config'
-  import { sid } from 'api/config'
+  import { loginUrl, sid } from './api/config'
   import api from './api/fetchData'
   import Tab from 'base/tab/tab'
   import CommonHeader from 'base/commonHeader/commonHeader'
-  import {mapMutations} from 'vuex'
+  import { mapMutations } from 'vuex'
 
   export default {
     name: 'App',
@@ -25,20 +26,20 @@
       return {}
     },
     components: {
-      Tab, CommonHeader
+      Tab, CommonHeader, Player
     },
     created () {
       this._login(sid)
     },
     methods: {
       _login (sessionid) {
-        const url = HOST + '/login.json'
+        const url = loginUrl
         return api.getData(url, 'get', {
           params: {'wind.sessionid': sessionid}
         }).then((res) => {
           console.log(res)
           // TODO mutation state
-          this.userInfo(res)
+          //this.userInfo(res)
         }).catch((e) => {
           console.log(e)
           console.log(ERR_CODE)
@@ -71,6 +72,9 @@
 
     .tab {
       flex: 0 0 auto;
+    }
+    .ali-player {
+      margin-bottom: 50px;
     }
   }
 </style>

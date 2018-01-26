@@ -4,15 +4,16 @@ import Vue from 'vue'
 import MintUI from 'mint-ui'
 import 'mint-ui/lib/style.css'
 import App from './App'
-import router from './router'
 import store from './store'
+import router from './router'
+import 'common/scss/icon.scss'
 import 'lib-flexible/flexible.js'
 
-import 'common/scss/icon.scss'
+// require('./mock/mock.js')
 
 Vue.config.productionTip = false
 Vue.use(MintUI)
-process.env.NODE_ENV === 'production' && require('mockjs')
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
