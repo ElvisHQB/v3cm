@@ -6,13 +6,11 @@
         <router-view></router-view>
       </keep-alive>
     </div>
-    <player class="ali-player"></player>
     <tab class="tab"></tab>
   </div>
 </template>
 
 <script>
-  import Player from 'base/player/player'
   import * as ERR_CODE from 'api/errorCode'
   import { loginUrl, sid } from './api/config'
   import api from './api/fetchData'
@@ -26,7 +24,7 @@
       return {}
     },
     components: {
-      Tab, CommonHeader, Player
+      Tab, CommonHeader
     },
     created () {
       this._login(sid)
@@ -72,9 +70,6 @@
 
     .tab {
       flex: 0 0 auto;
-    }
-    .ali-player {
-      margin-bottom: 50px;
     }
   }
 </style>

@@ -6,6 +6,7 @@ import MeetingInfo from 'components/meetingInfo/meetingInfo'
 import PersonalCenter from 'components/personalCenter/personalCenter'
 import Search from 'components/search/search'
 import CreateMeeting from 'components/createMeeting/createMeeting'
+import SelectAttendance from 'components/selectAttendance/selectAttendance'
 
 Vue.use(Router)
 
@@ -36,6 +37,10 @@ export default new Router({
       //     component: other
       //   }
       // ]
+    },
+    {
+      path: '/selectAttendance',
+      component: SelectAttendance
     },
     {
       path: '/search',
