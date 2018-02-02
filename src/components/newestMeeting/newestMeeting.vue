@@ -22,7 +22,7 @@
   import * as ERR_CODE from '../../api/errorCode'
   import ScrollList from '../../base/scrollList/scrollList'
   import { genMeetingListItem } from '../../common/js/utils'
-  import { SET_NEWEST_MEETING_LIST } from '../../store/mutation-types'
+//  import { SET_NEWEST_MEETING_LIST } from '../../store/mutation-types'
 
   export default {
     name: 'newestMeeting',
@@ -82,9 +82,9 @@
             this.noMoreData = meetingList.length < pageSize
             // 对上拉下拉的处理
             if (currentPage === 1) {
-              this.$store.commit(SET_NEWEST_MEETING_LIST, meetingList)
+//              this.$store.commit(SET_NEWEST_MEETING_LIST, meetingList)
             } else {
-              this.$store.commit(SET_NEWEST_MEETING_LIST, this.newestMeeting.concat(meetingList))
+//              this.$store.commit(SET_NEWEST_MEETING_LIST, this.newestMeeting.concat(meetingList))
             }
         }).catch((e) => {
           console.log(e)
