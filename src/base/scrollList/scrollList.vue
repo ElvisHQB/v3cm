@@ -19,8 +19,7 @@
         </div>
       </mt-loadmore>
       <!--底部无更多数据-->
-      <!--TODO 接真是数据，进行判断，如果count < 10-->
-      <div v-show="noMoreData" class="pull-bottom-wrapper">
+      <div v-show="noMore" class="pull-bottom-wrapper">
         <div class="pull-bottom">
           <span>没有更多数据了</span>
         </div>
@@ -29,51 +28,47 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import ListView from '../../base/listView/listView.vue'
-//  import { DEBUG } from 'api/config'
+  import ListView from '../../base/listView/listView'
+
   export default {
     name: 'scrollList',
     components: {
       ListView
     },
-//    props: {
-//      getter: ''
-//    },
-//    created() {
-//      this.listData = this.getter
-//    },
     props: {
+      // list数据数组
       listData: {
         type: Array,
         default: function () {
           return {}
         }
+      },
+      // 是否还有更多数据
+      noMore: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
       return {
-        //数据数组
-//        listData: [],
         topPullText: '下拉可以刷新',
         topDropText: '释放立即刷新',
         topLoadingText: '正在刷新...',
         distance: 50,
         allLoaded: false,
-        bottomLoadingText: '正在加载...',
-        // 刷新时判断，若没有更多内容则set为false
-        noMoreData: true
+        bottomLoadingText: '正在加载...'
       }
     },
     methods: {
+      // 触发下拉刷新事件
       _loadTop() {
-        // 触发下拉刷新事件
         this.$emit('loadTop')
         this.$refs.loadmore.onTopLoaded()
       },
+      // 触发上拉加载事件
       _loadBottom() {
-        // 触发上拉加载事件
         this.$emit('loadBottom')
-        this.allLoaded = true
+        this.allLoaded = false
         this.$refs.loadmore.onBottomLoaded()
       }
     }

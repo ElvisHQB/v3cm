@@ -3,7 +3,7 @@
   <div class="common-header">
     <!--左侧返回Btn-->
     <div class="header-left">
-      <div class="icon-back-btn">
+      <div class="icon-back-btn" @click="_goBack">
         <span class="icon-select"><i class="icon-fanhui"></i></span>
       </div>
     </div>
@@ -56,16 +56,18 @@
       }
     },
     methods: {
+      _goBack() {
+        this.$router.back()
+      },
       _clickOnSearch() {
         this.$router.push({ path: '/search' })
       },
       _searchMeeting() {
         //将搜索字符串存入Vuex
-        this.$emit('searchMeeting')
+//        this.$emit('searchMeeting')
         this.$store.commit(SET_SEARCH_STR, this.searchStr)
       },
       _createMeeting() {
-        //
         this.$router.push({ path: '/createMeeting' })
       }
     },
@@ -79,10 +81,16 @@
       //watch路由变化，根据路由渲染common header
       '$route': {
         handler: function () {
+          // TODO 可配置
           const regex1 = /^(\/newestMeeting)|(\/historyMeeting)|(\/meetingInfo)$/
           const regex2 = /^(\/personalCenter)$/
           const regex3 = /^(\/search)$/
           const regex4 = /^(\/createMeeting)$/
+          const regex5 = /^(\/selectAttendance)$/
+          const regex6 = /^(\/personalCenter\/publishedMeeting)$/
+          const regex7 = /^(\/personalCenter\/privateMeeting)$/
+          const regex8 = /^(\/personalCenter\/myCollection)$/
+          const regex9 = /^(\/personalCenter\/latestPlay)$/
           if (regex1.test(this.$route.path)) {
             this.renderHeader.center = 1
             this.renderHeader.right = 1
@@ -101,10 +109,39 @@
             this.renderHeader.right = 0
             this.renderHeader.titleValue = '发起会议'
           }
+          if (regex5.test(this.$route.path)) {
+            this.renderHeader.center = 2
+            this.renderHeader.right = 0
+            this.renderHeader.titleValue = '选择参会人'
+          }
+          if (regex6.test(this.$route.path)) {
+            this.renderHeader.center = 2
+            this.renderHeader.right = 0
+            this.renderHeader.titleValue = '公开会议'
+          }
+          if (regex7.test(this.$route.path)) {
+            this.renderHeader.center = 2
+            this.renderHeader.right = 0
+            this.renderHeader.titleValue = '私人会议'
+          }
+          if (regex8.test(this.$route.path)) {
+            this.renderHeader.center = 2
+            this.renderHeader.right = 0
+            this.renderHeader.titleValue = '我的收藏'
+          }
+          if (regex9.test(this.$route.path)) {
+            this.renderHeader.center = 2
+            this.renderHeader.right = 0
+            this.renderHeader.titleValue = '最近播放'
+          }
+//          this.searchStr = ''
         },
         // 创建watcher是就执行一次handler方法
         immediate: true
       }
+//      '$store.getters.searchStr': function () {
+//        this.searchStr = this.$store.getters.searchStr
+//      }
     }
   }
 </script>

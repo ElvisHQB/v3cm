@@ -6,13 +6,11 @@
         <router-view></router-view>
       </keep-alive>
     </div>
-    <player class="ali-player"></player>
-    <tab class="tab"></tab>
+    <tab v-show="tabDisplay" class="tab"></tab>
   </div>
 </template>
 
 <script>
-  import Player from 'base/player/player'
   import * as ERR_CODE from 'api/errorCode'
   import { loginUrl, sid } from './api/config'
   import api from './api/fetchData'
@@ -23,10 +21,12 @@
   export default {
     name: 'App',
     data () {
-      return {}
+      return {
+        tabDisplay: true
+      }
     },
     components: {
-      Tab, CommonHeader, Player
+      Tab, CommonHeader
     },
     created () {
       this._login(sid)
@@ -48,6 +48,17 @@
       ...mapMutations({
         userInfo: 'SET_USER_INFO'
       })
+    },
+    watch: {
+      // 根据路由控制底部tab的显示，只在四个tab对应的页面显示tab，其他页面隐藏tab
+      '$route': {
+        handler: function () {
+          // TODO 路由可配置，不要写死
+          const regex = /^(\/newestMeeting)|(\/historyMeeting)|(\/meetingInfo)|(\/personalCenter)$/
+          this.tabDisplay = regex.test(this.$route.path)
+        },
+        immediate: true
+      }
     }
   }
 </script>

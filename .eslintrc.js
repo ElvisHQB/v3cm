@@ -31,5 +31,7 @@ module.exports = {
     "space-in-parens": [0, "never"],
     "spaced-comment": 0,
     "space-before-function-paren": [0, "always"],
+    "no-new-object": 0,
+    "no-extend-native": 0
   }
 }

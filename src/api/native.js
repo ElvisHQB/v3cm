@@ -1,3 +1,5 @@
+import { MessageBox } from 'mint-ui'
+import { moduleName } from './config'
 
 // for native methods
 // var ShareTypeEnum = {
@@ -21,7 +23,6 @@
 // ChooseFriendType.E_SHARE_MSG = 11, //分享字符消息
 // ChooseFriendType.E_SHARE_IMAGE = 12 //分享图片
 
-// const ModuleName = '3C'
 //
 // // 定义手机联系人测试数据
 // const CONTACTS = [{
@@ -194,14 +195,14 @@ callback：回调函数 retCode  -1：无权限，0：成功 1：失败  calende
 /**
  *   获取下载项数（含已完成和未完成）
  */
-// function getDownloadItemCount() {
-//   console.log('call native getDownloadItemCount')
-//   if (top.wdobject) {
-//     return top.wdobject.getDownloadItemCount(ModuleName)
-//   } else {
-//     return 0
-//   }
-// }
+export const getDownloadItemCount = () => {
+  console.log('call native getDownloadItemCount')
+  if (top.wdobject) {
+    return top.wdobject.getDownloadItemCount(moduleName)
+  } else {
+    return 0
+  }
+}
 
 /**
  *   打开下载管理页面
@@ -268,7 +269,7 @@ callback：回调函数 retCode  -1：无权限，0：成功 1：失败  calende
 /**
  * 更新播放器的view的模式
  * @param type      1 悬浮 2 历史会议播放 3 直播会议
-*/
+ */
 // function updateMediaType(type) {
 //   console.log('call native updateMediaType', type)
 //   if (top.wdobject) {
@@ -451,3 +452,23 @@ callback：回调函数 retCode  -1：无权限，0：成功 1：失败  calende
 //
 //     }
 // }
+export const openWebView = (isBackTitle, title, url, useNative) => {
+  console.log('call native openWebView', isBackTitle, title, url, useNative)
+  if (top.wdobject && useNative) {
+    var params = {
+      'operate': 'openurl', //原生操作函数名称
+      'data': {
+        'title': title,
+        'url': url,
+        'isembed': true,
+        'isstatusbar': 0,
+        'hastitlebar': isBackTitle
+      },
+      'hassearchbtn': false
+    }
+    console.log(JSON.stringify(params))
+    top.wdobject.shell_Req(JSON.stringify(params))
+  } else {
+    MessageBox('提示', title + url)
+  }
+}

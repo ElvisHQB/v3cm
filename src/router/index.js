@@ -6,6 +6,11 @@ import MeetingInfo from 'components/meetingInfo/meetingInfo'
 import PersonalCenter from 'components/personalCenter/personalCenter'
 import Search from 'components/search/search'
 import CreateMeeting from 'components/createMeeting/createMeeting'
+import PublishedMeeting from 'components/personalCenter/publishedMeeting/publishedMeeting'
+import PrivateMeeting from 'components/personalCenter/privateMeeting/privateMeeting'
+import MyCollection from 'components/personalCenter/myCollection/myCollection'
+import LatestPlay from 'components/personalCenter/latestPlay/latestPlay'
+import SelectAttendance from 'components/selectAttendance/selectAttendance'
 
 Vue.use(Router)
 
@@ -30,12 +35,6 @@ export default new Router({
     {
       path: '/personalCenter',
       component: PersonalCenter
-      // children: [
-      //   {
-      //     path: ':id',
-      //     component: other
-      //   }
-      // ]
     },
     {
       path: '/search',
@@ -44,6 +43,26 @@ export default new Router({
     {
       path: '/createMeeting',
       component: CreateMeeting
+    },
+    {
+      path: '/selectAttendance',
+      component: SelectAttendance
+    },
+    {
+      path: '/personalCenter/publishedMeeting',
+      component: PublishedMeeting
+    },
+    {
+      path: '/personalCenter/privateMeeting',
+      component: PrivateMeeting
+    },
+    {
+      path: '/personalCenter/myCollection',
+      component: MyCollection
+    },
+    {
+      path: '/personalCenter/latestPlay',
+      component: LatestPlay
     }
   ]
 })

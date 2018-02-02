@@ -3,9 +3,9 @@
     <div class="selector-tab">
       <div class="selector-tab-item" :class="{'selector-tab-item-active': isShow[index]}" :title="title"
            v-for="(item,index) in title" :key="index"
-           @click="_selectTab(index,title.length)">
-        <a><span class="selector-span" :class="{'selector-span-active': isShow[index]}">{{item}}
-          <i :class="{'icon-xiangxia': !isShow[index], 'icon-xiangshang': isShow[index]}"></i></span></a>
+           @click.stop="_selectTab(index,title.length)">
+        <div><span class="selector-span" :class="{'selector-span-active': isShow[index]}">{{item}}
+          <i :class="{'icon-xiangxia': !isShow[index], 'icon-xiangshang': isShow[index]}"></i></span></div>
       </div>
     </div>
     <transition-group name="fade">
@@ -22,7 +22,6 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapMutations} from 'vuex'
 
   export default {
     name: 'selector',
@@ -73,10 +72,7 @@
             this.$set(this.isShow, i, false)
           }
         }
-      },
-      ...mapMutations({
-
-      })
+      }
     }
   }
 </script>

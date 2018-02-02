@@ -1,66 +1,71 @@
 <template>
   <div class="ali-player">
     <div class="prism-player" id="J_prismPlayer" style="position: absolute"></div>
-    <button @click="play()">播放</button>
-    <button @click="pause()">暂停</button>
-    <button @click="replay()">重播</button>
+    <button @click="play">播放</button>
+    <button @click="pause">暂停</button>
+    <button @click="replay">重播</button>
   </div>
 </template>
 <script type="text/ecmascript-6">
+  import VueAliplayer from 'vue-aliplayer'
+
   export default {
-    name: 'player',
+    name: 'aliplayer',
     data () {
       return {
-        //mediaUrl: 'http://streamplay.wind3c.net/live/flvstream-L4.flv',
-        /* eslint-disable*/
         options: {
           width: '100%',
           height: '55px',
+          showBuffer: true,
           id: 'J_prismPlayer',
-          width: '100%',
           autoplay: false,
+          useH5Prism: true,
+          x5_type: 'h5',
+          isLive: true,
+          preload: true,
           //支持播放地址播放,此播放优先级最高
-          source: 'http://streamplay.wind3c.net/live/flvstream-L1.m3u8'
+//          source: 'http://sk.cri.cn/887.m3u8'
+          source: 'static/sound.mp3'
         },
         playerInstance: null
       }
     },
-    create () {
+    created () {
     },
     mounted () {
-      this.player()
+      this.playerInit()
     },
     methods: {
-      player () {
-        this.playerInstance = new Aliplayer(this.options, function (player) {
-          console.log('播放器创建好了。')
+      playerInit () {
+        /* eslint-disable */
+        const player = new Aliplayer(this.options, function (player) {
+          console.log('播放器创建好了。', player)
         })
-        this.playerInstance.on('liveStreamStop', function () {
-          console.log('zhongduan')
-        })
+        this.playerInstance = player
       },
       play () {
-        console.log('播放')
         console.log(this.playerInstance)
         this.playerInstance.play()
       },
       pause () {
-        console.log('暂停')
+        console.log(this.playerInstance)
         this.playerInstance.pause()
       },
       replay () {
-        console.log('重播')
+        console.log(this.playerInstance)
         this.playerInstance.replay()
       }
     },
-    components: {}
+    components: {
+      'ali-player': VueAliplayer
+    }
   }
 </script>
 
 <style scoped lang="scss">
-.ali-player {
-  .prism-player {
-    display: none;
+  .ali-player {
+    .prism-player {
+      display: none;
+    }
   }
-}
 </style>
