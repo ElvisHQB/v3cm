@@ -36,5 +36,13 @@ export const createNewMeetingUrl = HOST + '/createNewMeeting.json'
 export const searchMeetingUrl = HOST + '/searchMeeting.json'
 //会议详情
 export const getMeetingDetailUrl = HOST + '/getMeetingDetail.json'
-//评论
+//获取评论
 export const getMeetingCommentsDetailUrl = HOST + '/getMeetingCommentsDetail.json'
+//评论
+export const commentMeetingUrl = HOST + '/commentMeeting.json'
+//录音地址
+export const getRecordUrl = HOST + '/getRecordUrl.json'
+//视频回放地址
+export const getMeetingPlaybackUrl = HOST + '/getMeetingPlaybackUrl.json'
+//附件地址
+export const getDocumentUrl = HOST + '/getDocumentUrl.json'
