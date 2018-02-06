@@ -95,6 +95,12 @@
             this.renderHeader.center = 1
             this.renderHeader.right = 1
           }
+//          if (meetingDetail.test(this.$route.path)) {
+//            console.log('detail')
+//            this.renderHeader.center = 2
+//            this.renderHeader.right = 3
+//            this.renderHeader.titleValue = '详情'
+//          }
           if (regex2.test(this.$route.path)) {
             this.renderHeader.center = 2
             this.renderHeader.right = 0

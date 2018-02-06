@@ -14,7 +14,6 @@
 </template>
 <script type="text/ecmascript-6">
   import TabSelect from '../../base/tabSelect/tabSelect'
-  import ContactList from '../../base/contactList/contactList'
   import phoneContact from './phoneContact'
   import iWandContact from './iWandContact'
 
@@ -22,7 +21,6 @@
     name: 'selectAttendance',
     components: {
       TabSelect,
-      ContactList,
       phoneContact,
       iWandContact
     },

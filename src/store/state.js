@@ -6,6 +6,8 @@ export default {
   currentPage: 'newestMeeting',
   meetingInfo: {},
   partnersInfo: {},
+  //最新会议列表
+  newestMeetingList: [],
   //搜索会议结果
   searchMeetingList: [],
   //搜索会议搜索字符串

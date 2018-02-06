@@ -4,11 +4,9 @@
     </div>
 </template>
 <script type="text/ecmascript-6">
-  import ContactList from '../../base/contactList/contactList'
 
   export default {
     components: {
-      ContactList
     },
     data() {
       return {

@@ -43,6 +43,13 @@ export default new Router({
     {
       path: '/createMeeting',
       component: CreateMeeting
+      // children: [
+      //   {
+      //     // name: 'selectAttendance',
+      //     path: 'selectAttendance',
+      //     component: SelectAttendance
+      //   }
+      // ]
     },
     {
       path: '/selectAttendance',
