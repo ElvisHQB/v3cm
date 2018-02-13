@@ -2,13 +2,13 @@
   <div class="create-meeting">
     <!--Tab选项-->
     <div class="tab-select">
-      <div class="meeting-select" @click="_toggleToPublic" v-bind:class="{ active: selectedPublic }">公开会议</div>
-      <div class="meeting-select" @click="_toggleToPrivate" v-bind:class="{ active: selectedPrivate }">私人会议</div>
+      <div class="meeting-select" @click="_toggleToPublic" v-bind:class="{ active: selectPublic }">公开会议</div>
+      <div class="meeting-select" @click="_toggleToPrivate" v-bind:class="{ active: selectPrivate }">私人会议</div>
     </div>
     <!--会议内容-->
     <div class="meeting-content">
       <!--公开会议-->
-      <div v-if="selectedPublic" class="public-meeting-item">
+      <div v-if="selectPublic" class="public-meeting-item">
         <!--TODO 时间选择器，找更好的-->
         <div class="public-start-time meeting-item-style" @click="_openPicker">
           <div class="list-left-div">
@@ -49,7 +49,7 @@
         </div>
       </div>
       <!--私人会议-->
-      <div v-if="selectedPrivate" class="private-meeting-item">
+      <div v-if="selectPrivate" class="private-meeting-item">
         <div class="private-meeting-title meeting-item-style">
           <div class="list-left-div">
             <label>会议主题</label>
@@ -63,7 +63,8 @@
             <label>参会人</label>
           </div>
           <div class="list-right-div">
-            <span class="">请选择参会人</span>
+            <!--TODO ...-->
+            <span class="attendances">{{ attendanceText }}</span>
             <span class="icon-select"><i class="icon-add-o"></i></span>
           </div>
         </div>
@@ -86,19 +87,19 @@
           </div>
         </div>
         <div class="private-desktop-share meeting-item-style">
-          <div class="list-left-div">
+          <div class="list-left-div desktop-share">
             <label>桌面共享</label>
             <span class="icon-select-instruction" @click="_showInstruction"><i class="icon-shuoming"></i></span>
           </div>
           <div class="list-right-div">
             <!--TODO swich样式 -->
-            <span class="desktop-share-switch"><mt-switch v-model="switchValue"></mt-switch></span>
+            <span class="desktop-share-switch"><mt-switch v-model="switchValue" @change="_switchToggle"></mt-switch></span>
           </div>
         </div>
         <div class="meeting-description">
           <textarea rows="10" cols maxlength="1000" placeholder="请输入会议简介，不超过1000字"></textarea>
         </div>
-        <div class="meeting-submit-btn">
+        <div class="meeting-submit-btn" @click="clickOnSubmit">
           提交
         </div>
       </div>
@@ -109,26 +110,43 @@
 <script type="text/ecmascript-6">
   import { MessageBox } from 'mint-ui'
   import { desktopSharePrompt } from '../../api/prompt'
+  import { CLEAR_ATTENDANCE_LIST } from '../../store/mutation-types'
+
+  const maxAttendanceNum = 12
   export default {
     name: 'createMeeting',
     data() {
       return {
-        selectedPublic: true,
-        selectedPrivate: false,
+        selectPublic: true,
+        selectPrivate: false,
         pickerValue: null,
-        switchValue: true
+        switchValue: true,
+        attendanceText: '请选择参会人'
       }
     },
     computed: {
+      attendanceList() {
+        return this.$store.getters.attendanceList
+      }
     },
     methods: {
+      _switchToggle() {
+        if (this.switchValue) {
+          let len = this.attendanceList.phoneList.length + this.attendanceList.iWandList.length
+          if (len > maxAttendanceNum) {
+            this.$messagebox.alert('目前桌面共享功能，只支持12人以下规模的会议，请知晓!').then(action => {
+              this.switchValue = false
+            })
+          }
+        }
+      },
       _toggleToPublic() {
-        this.selectedPublic = true
-        this.selectedPrivate = false
+        this.selectPublic = true
+        this.selectPrivate = false
       },
       _toggleToPrivate() {
-        this.selectedPublic = false
-        this.selectedPrivate = true
+        this.selectPublic = false
+        this.selectPrivate = true
       },
       _selectAttendance() {
         this.$router.push({ path: '/selectAttendance' })
@@ -141,7 +159,32 @@
           title: '提示',
           message: desktopSharePrompt
         })
+      },
+      clickOnSubmit() {
+        //提交完成之后，清空vuex中的已选参会人
+        this.$store.commit(CLEAR_ATTENDANCE_LIST)
       }
+    },
+    activated() {
+      //TODO
+      let len = this.attendanceList.phoneList.length + this.attendanceList.iWandList.length
+      if (len === 0) {
+        this.attendanceText = '请选择参会人'
+      } else {
+        this.attendanceText = ''
+        for (let u1 of this.attendanceList.phoneList) {
+          this.attendanceText += u1.name + ','
+        }
+        for (let u2 of this.attendanceList.iWandList) {
+          this.attendanceText += u2.name + ','
+        }
+      }
+      if (len > maxAttendanceNum) {
+        this.$messagebox.alert('目前桌面共享功能，只支持12人以下规模的会议，请知晓!').then(action => {
+          this.switchValue = false
+        })
+      }
+      console.log('back to createMeeting...')
     }
   }
 </script>
@@ -193,6 +236,14 @@
         }
         .private-meeting-attendance {
           margin: 10px 0;
+          .attendances {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            margin-right: 40px;
+          }
         }
         .private-start-time {
           flex: 1;
@@ -204,13 +255,28 @@
         .private-desktop-share {
           margin-top: 16px;
           margin-bottom: 10px;
-          .icon-select-instruction {
-            /*display: inline-block;*/
-            color: #bbb;
+          line-height: 40px;
+          .desktop-share {
+            padding: 8px 15px;
+            label {
+              position: relative;
+              top: -3px;
+            }
+            .icon-select-instruction {
+              /*display: inline-block;*/
+              color: #bbb;
+            }
           }
           .desktop-share-switch {
+            padding: 4px 0;
             position: absolute;
             right: 10px;
+            .mint-switch {
+              /deep/ .mint-switch-input:checked + .mint-switch-core {
+                border-color: #dd2738;
+                background-color: #dd2738;
+              }
+            }
           }
         }
       }
@@ -224,12 +290,14 @@
         color: #000;
       }
       .list-right-div {
+        position: relative;
         flex: 7;
         font-size: 14px;
         color: #999;
         .icon-select {
           display: inline-block;
           position: absolute;
+          top: 0;
           right: 5px;
           width: 40px;
           height: 40px;

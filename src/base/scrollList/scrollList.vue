@@ -67,8 +67,11 @@
       },
       // 触发上拉加载事件
       _loadBottom() {
-        this.$emit('loadBottom')
-        this.allLoaded = false
+        if (!this.noMore) {
+          this.$emit('loadBottom')
+        }
+//        this.allLoaded = this.noMore
+        this.bottomAllLoaded = this.noMore
         this.$refs.loadmore.onBottomLoaded()
       }
     }

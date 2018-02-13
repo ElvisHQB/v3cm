@@ -10,7 +10,9 @@
   import {getMyMeetingListUrl} from '../../../api/config'
   import {genMeetingListItem} from '../../../common/js/utils'
   import api from '../../../api/fetchData'
-  import * as ERR_CODE from '../../../api/errorCode'
+  import ERR_CODE from '../../../api/errorCode'
+  import { SET_PUBLISHED_MEETING_LIST } from '../../../store/mutation-types'
+  import { closeWebView } from '../../../api/native'
 
   export default {
     name: 'published-meeting',
@@ -22,7 +24,6 @@
     },
     data() {
       return {
-        myMeeting: [],
         // TODO 分页大小，可配置？
         currentPage: 1,
         pageSize: 10,
@@ -30,8 +31,14 @@
         noMoreData: false
       }
     },
+    computed: {
+      myMeeting() {
+        return this.$store.getters.publishedMeetingList
+      }
+    },
     methods: {
       _getMyMeeting(currentPage) {
+        if (this.noMoreData) return
         this.currentPage = currentPage
         const url = getMyMeetingListUrl
         let params = {
@@ -54,14 +61,29 @@
             }
             // 对上拉下拉的处理
             if (currentPage === 1) {
-              this.myMeeting = meetingList
+              this.$store.commit(SET_PUBLISHED_MEETING_LIST, meetingList)
             } else {
-              this.myMeeting = this.myMeeting.concat(meetingList)
+              this.$store.commit(SET_PUBLISHED_MEETING_LIST, this.myMeeting.concat(meetingList))
             }
             // TODO mutation state
           }).catch((e) => {
-            console.log(e)
-            console.log(ERR_CODE)
+            console.log(e.response)
+            let response = e.response.data ? e.response.data : false
+            if (response && response.errorMsg) {
+              if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
+                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              } else {
+                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              }
+            } else {
+              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                closeWebView(true)
+              })
+            }
           })
       }
     }

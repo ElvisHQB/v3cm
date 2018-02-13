@@ -1,33 +1,40 @@
 <template>
-  <div class="list-wrapper" @click="turnToDetail(item.id)">
+  <div class="list-wrapper" @click="turnToDetail(item.id, item.isRestricted)">
+    <!--顶部列表内容-->
     <div class="list-top-item">
       <div class="list-left-content">
+        <!--渲染会议状态和报名状态标识-->
         <div v-if="renderImgTile" class="list-img-title">
-          <div v-if="renderMeetingStatus">
-            <img src="../../assets/bq2.png" style="width: 50px">
+          <div v-if="renderSignupStatus" class="img-title">
+            <img src="../../assets/bq2.png">
+            <div class="img-title-text"><span>已报名</span></div>
           </div>
-          <div v-if="renderSignupStatus">
-            <img src="../../assets/bq1.png" style="width: 50px">
+          <div v-if="renderMeetingStatus" class="img-title">
+            <img src="../../assets/bq1.png">
+            <div class="img-title-text"><span>直播中</span></div>
           </div>
         </div>
+        <!--机构Logo-->
         <div class="left-img-wrapper">
           <img class="left-img" v-lazy="item.imgUrl">
         </div>
       </div>
       <div class="list-right-content">
+        <!--会议标题时间及主讲人信息-->
         <div class="right-p-wrapper">
           <p class="right-p-title">{{ item.title }}</p>
           <p class="right-p-speaker-sponsor"><span class="speaker">{{ item.lecturer }}</span><span class="sponsor">{{ item.sponsor }}</span></p>
           <p class="right-p-time">{{ item.meetingTime }}</p>
         </div>
-        <div v-if="renderRecommend">
+        <!--渲染推荐状态标识-->
+        <div v-if="renderRecommend"  class="recommend-mark">
           <img src="../../assets/tj.png" style="width: 20px">
         </div>
       </div>
     </div>
-    <!---->
+    <!--底部会议下载，看速记，听录音-->
     <div v-if="renderBottomItem" class="list-bottom-item">
-      <div v-if="renderRecord" class="item" @click.stop="clickRecord(item.id, item.audioId)">
+      <div v-if="renderRecord" class="item" @click.stop="clickRecord(item)">
         <div class="top-icon-item">
           <span><i class="icon-jianting"></i></span>
         </div>
@@ -35,7 +42,7 @@
           <span>听录音</span>
         </div>
       </div>
-      <div v-if="renderShortHand" class="item" @click.stop="clickShortHand(item.id, item.pdfId)">
+      <div v-if="renderShortHand" class="item" @click.stop="clickShortHand(item.id, item.pdfId, item.title)">
         <div class="top-icon-item">
           <span><i class="icon-doc"></i></span>
         </div>
@@ -43,7 +50,7 @@
           <span>看速记</span>
         </div>
       </div>
-      <div v-if="renderDownload" class="item" @click.stop="clickDownload(item.id, item.audioId)">
+      <div v-if="renderDownload" class="item" @click.stop="clickDownload(item.id, item.audioId, item.title)">
         <div class="top-icon-item">
           <span><i class="icon-download"></i></span>
         </div>
@@ -51,7 +58,7 @@
           <span>下载</span>
         </div>
       </div>
-      <div v-if="renderVideo" class="item" @click.stop="clickVideo(item.id, item.title)">
+      <div v-if="renderVideo" class="item" @click.stop="clickVideo(item)">
         <div class="top-icon-item">
           <span><i class="icon-video"></i></span>
         </div>
@@ -64,9 +71,8 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { getRecordUrl, getMeetingPlaybackUrl, getDocumentUrl } from 'api/config'
-  import api from 'api/fetchData'
-  import { openWebView } from 'api/native'
+  import { detailAuthentication, getAudioUrl, getDocument, getMeetingPlayback } from '../../common/js/httpRequests'
+
   export default {
     props: {
       item: {
@@ -79,6 +85,7 @@
     created () {
     },
     computed: {
+      // TODO 只在最新会议页面渲染 or 所有页面
       renderImgTile() {
         return (this.item.meetingStatus === 'STARTED') || (this.item.signupStatus === true)
       },
@@ -89,7 +96,7 @@
         return (this.item.signupStatus === true) && (this.item.meetingStatus !== 'STARTED')
       },
       renderRecommend() {
-        return this.item.recommend
+        return this.item.recommend && ((this.item.meetingStatus === 'PUBLISHED') || (this.item.meetingStatus === 'STARTED'))
       },
       renderBottomItem() {
         return (this.item.pdfId !== 0) || (this.item.audioId !== 0) || (this.item.broadcastType === 'WEBVIDEO')
@@ -108,74 +115,25 @@
       }
     },
     methods: {
-      turnToDetail (id) {
-        this.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+      turnToDetail (id, isRestricted) {
+        let self = this
+        detailAuthentication(id, isRestricted, self)
       },
-      clickRecord(id, audioId) {
-        const url = getRecordUrl
-        let params = {
-          meetingId: id,
-          audioId: audioId
-        }
-        return api.getData(url, 'get', { params: params })
-          .then((res) => {
-            const recordUrl = res
-            console.log(recordUrl)
-            // TODO
-          })
-          .catch((e) => {
-            console.log(e)
-          })
+      clickRecord(item) {
+        let self = this
+        getAudioUrl(item.id, item.audioId, item.title, false, self, item)
       },
-      clickShortHand(id, pdfId) {
-        const url = getDocumentUrl
-        let params = {
-          meetingId: id,
-          documentId: pdfId,
-          documentType: 'SHORTHAND'
-        }
-        return api.getData(url, 'get', { params: params })
-          .then((res) => {
-            const documentUrl = res
-            console.log(documentUrl)
-            // TODO
-          })
-          .catch((e) => {
-            console.log(e)
-          })
+      clickShortHand(id, pdfId, title) {
+        let self = this
+        getDocument(id, pdfId, title, self)
       },
-      clickDownload(id, audioId) {
-        const url = getRecordUrl
-        let params = {
-          meetingId: id,
-          audioId: audioId
-        }
-        return api.getData(url, 'get', { params: params })
-          .then((res) => {
-            const downloadUrl = res
-            console.log(downloadUrl)
-            // TODO
-          })
-          .catch((e) => {
-            console.log(e)
-          })
+      clickDownload(id, audioId, title) {
+        let self = this
+        getAudioUrl(id, audioId, title, true, self)
       },
-      clickVideo(id, title) {
-        const url = getMeetingPlaybackUrl
-        let params = {
-          meetingId: id
-        }
-        return api.getData(url, 'get', { params: params })
-          .then((res) => {
-            const videoUrl = res
-            console.log(videoUrl)
-            // TODO url拼接
-            //通过WebView在APP打开网页页面
-            openWebView(true, title, videoUrl, true)
-          })
-          .catch((e) => {
-            console.log(e)
-          })
+      clickVideo(item) {
+        let self = this
+        getMeetingPlayback(item, self)
       }
     }
   }
@@ -193,8 +151,7 @@
 
   .list-wrapper {
     background-color: $list-color;
-    display: flex;
-    flex-direction: column;
+    position: relative;
     margin-top: 6px;
     padding: 11px 15px;
     .list-top-item {
@@ -202,6 +159,25 @@
       flex-direction: row;
       margin-top: 10px;
       .list-left-content {
+        .list-img-title {
+          position: absolute;
+          left: 5px;
+          top: 0;
+          width: 50px;
+          .img-title {
+            img {
+              width: 50px;
+              height: 21px;
+            }
+            .img-title-text {
+              position: absolute;
+              left: 7px;
+              top: 0;
+              font-size: 12px;
+              color: white;
+            }
+          }
+        }
         .left-img-wrapper {
           .left-img {
             width: $left-img-width;
@@ -219,7 +195,7 @@
           line-height: $list-line-height;
           .right-p-title {
             font-size: $font-size-medium-x;
-            padding-right: 20px;
+            padding-right: 30px;
             margin-bottom: 7px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -249,6 +225,13 @@
               margin-right: 5px;
             }
           }
+        }
+        .recommend-mark {
+          position: absolute;
+          right: 20px;
+          top: 20px;
+          height: 20px;
+          width: 20px;
         }
       }
     }

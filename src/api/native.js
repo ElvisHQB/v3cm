@@ -1,121 +1,136 @@
-import { MessageBox } from 'mint-ui'
-import { moduleName } from './config'
+import {MessageBox} from 'mint-ui'
+import {moduleName} from './config'
 
 // for native methods
-// var ShareTypeEnum = {
-//   ShareTypeEnum_IWind: 0, //分享到IWind
-//   ShareTypeEnum_Mail: 1, //通过邮件分享
-//   ShareTypeEnum_Message: 2, //通过短信分享
-//   ShareTypeEnum_Sian: 3, //分享到新浪微博
-//   ShareTypeEnum_WeChat: 4, //分享到微信
-//   ShareTypeEnum_WeChatDiscover: 5, //分享到微信朋友圈
-//   ShareTypeEnum_Safari: 6 //在Safari中打开
-// }
-// var ChooseFriendType = {}
-// ChooseFriendType.E_SHARE_NEWS = 0, // 分享新闻
-// ChooseFriendType.E_SHARE_FRIEND = 1, // 分享好友
-// ChooseFriendType.E_SHARE_STOCK = 2, // 分享股票
-// ChooseFriendType.E_TRANSMIT = 3, // 转发
-// ChooseFriendType.E_SHARE_MEETING = 4, // 分享会议
-// ChooseFriendType.E_SHARE_REPORT = 5, // 分享研究报告
-// ChooseFriendType.E_SHARE_BRIEF_REPORT = 9,
-// ChooseFriendType.E_SHARE_IPO = 10, //分享新股
-// ChooseFriendType.E_SHARE_MSG = 11, //分享字符消息
-// ChooseFriendType.E_SHARE_IMAGE = 12 //分享图片
+const ShareTypeEnum = {
+  ShareTypeEnum_IWind: 0, //分享到IWind
+  ShareTypeEnum_Mail: 1, //通过邮件分享
+  ShareTypeEnum_Message: 2, //通过短信分享
+  ShareTypeEnum_Sian: 3, //分享到新浪微博
+  ShareTypeEnum_WeChat: 4, //分享到微信
+  ShareTypeEnum_WeChatDiscover: 5, //分享到微信朋友圈
+  ShareTypeEnum_Safari: 6 //在Safari中打开
+}
+const ChooseFriendType = {}
+ChooseFriendType.E_SHARE_NEWS = 0 // 分享新闻
+ChooseFriendType.E_SHARE_FRIEND = 1 // 分享好友
+ChooseFriendType.E_SHARE_STOCK = 2 // 分享股票
+ChooseFriendType.E_TRANSMIT = 3 // 转发
+ChooseFriendType.E_SHARE_MEETING = 4 // 分享会议
+ChooseFriendType.E_SHARE_REPORT = 5 // 分享研究报告
+ChooseFriendType.E_SHARE_BRIEF_REPORT = 9
+ChooseFriendType.E_SHARE_IPO = 10 //分享新股
+ChooseFriendType.E_SHARE_MSG = 11 //分享字符消息
+ChooseFriendType.E_SHARE_IMAGE = 12 //分享图片
 
-//
 // // 定义手机联系人测试数据
-// const CONTACTS = [{
-//   'FamilyName': '齐天大圣',
-//   'Phone': ['13912340005']
-// },
-//   {
-//     'FamilyName': '13912340020',
-//     'Phone': ['13912340020']
-//   },
-//   {
-//     'FamilyName': '阿宝',
-//     'Phone': ['13912340001'],
-//     'Email': ['13912340001@wind.com.cn']
-//   },
-//   {
-//     'FamilyName': '安娜卡列尼娜',
-//     'Phone': ['13912340002']
-//   },
-//   {
-//     'FamilyName': '鸠摩智',
-//     'Phone': ['13912340003']
-//   },
-//   {
-//     'FamilyName': '李白',
-//     'Phone': ['13912340004']
-//   },
-//   {
-//     'FamilyName': '赵云',
-//     'Phone': ['13912340006']
-//   },
-//   {
-//     'FamilyName': '自由人',
-//     'Phone': ['13912340007']
-//   }
-// ]
+const CONTACTS = [{
+  'FamilyName': '齐天大圣',
+  'Phone': ['13912340005']
+},
+  {
+    'FamilyName': '13912340020',
+    'Phone': ['13912340020']
+  },
+  {
+    'FamilyName': '阿宝',
+    'Phone': ['13912340001'],
+    'Email': ['13912340001@wind.com.cn']
+  },
+  {
+    'FamilyName': '安娜卡列尼娜',
+    'Phone': ['13912340002']
+  },
+  {
+    'FamilyName': '鸠摩智',
+    'Phone': ['13912340003']
+  },
+  {
+    'FamilyName': '李白',
+    'Phone': ['13912340004']
+  },
+  {
+    'FamilyName': '赵云',
+    'Phone': ['13912340006']
+  },
+  {
+    'FamilyName': '自由人',
+    'Phone': ['13912340007']
+  }
+]
+
+//定义播放回调错误
+const mediaPlayErrorCode = {
+  'deviceType': 'iOS',
+  'errorCode': 1
+}
+
 /*
  * 闭包处理原生异步回调
  */
-// var eventCenter = function () {
-//   var center = {}
-//   var uniqueID = 0
-//   return {
-//     /////////////////////////////// 通讯录 //////////////////////////////////
-//     getContacts: function (func) {
-//       var id = ++uniqueID
-//       center[id + ''] = func
-//       if (top.wdobject) {
-//         top.wdobject.getContacts(id)
-//       } else {
-//         var content = JSON.stringify(CONTACTS)
-//         func(content)
-//       }
-//     },
-//     getContactsCallback: function (id, content) {
-//       window.setTimeout(function () {
-//         center[id](content)
-//       }, 0)
-//     },
-//     /////////////////////////////// 分享 //////////////////////////////////
-//     share: function (type, data, func) {
-//       var hint
-//       var id = ++uniqueID
-//       center[id + ''] = func
-//       if (top.wdobject) {
-//         top.wdobject.shareContent(id, ModuleName, type, data)
-//       } else {
-//         switch (type) {
-//           case ShareTypeEnum.ShareTypeEnum_IWind:
-//             hint = 'IWind'
-//             break
-//           case ShareTypeEnum.ShareTypeEnum_WeChatDiscover:
-//             hint = '微信朋友圈'
-//             break
-//           case ShareTypeEnum.ShareTypeEnum_WeChat:
-//           default:
-//             hint = '微信'
-//             break
-//         }
-//         MessageBox({
-//           title: '提示',
-//           message: '分享到' + hint + '调用原生分享界面',
-//           showCancelButton: false
-//         })
-//       }
-//     },
-//     shareCallback: function (id, content) {
-//       window.setTimeout(function () {
-//         center[id](content)
-//       }, 0)
-//     }
-//   }
-// }
+export const eventCenter = () => {
+  let center = {}
+  let uniqueID = 0
+  return {
+    /////////////////////////////// 通讯录 //////////////////////////////////
+    getContacts: function (func) {
+      let id = ++uniqueID
+      center[id + ''] = func
+      if (top.wdobject) {
+        top.wdobject.getContacts(id)
+      } else {
+        let content = JSON.stringify(CONTACTS)
+        func(content)
+      }
+    },
+    getContactsCallback: function (id, content) {
+      window.setTimeout(function () {
+        center[id](content)
+      }, 0)
+    },
+    /////////////////////////////// 分享 //////////////////////////////////
+    share: function (type, data, func) {
+      let hint
+      let id = ++uniqueID
+      center[id + ''] = func
+      if (top.wdobject) {
+        top.wdobject.shareContent(id, moduleName, type, data)
+      } else {
+        switch (type) {
+          case ShareTypeEnum.ShareTypeEnum_IWind:
+            hint = 'IWind'
+            break
+          case ShareTypeEnum.ShareTypeEnum_WeChatDiscover:
+            hint = '微信朋友圈'
+            break
+          case ShareTypeEnum.ShareTypeEnum_WeChat:
+          default:
+            hint = '微信'
+            break
+        }
+        MessageBox({
+          title: '提示',
+          message: '分享到' + hint + '调用原生分享界面',
+          showCancelButton: false
+        })
+      }
+    },
+    shareCallback: function (id, content) {
+      window.setTimeout(function () {
+        center[id](content)
+      }, 0)
+    }
+  }
+}
+
+/**
+ * 获取联系人
+ *
+ */
+export const getContacts = (callback) => {
+  console.log('call native getContacts', callback.name)
+  eventCenter().getContacts(callback)
+}
 
 /**
  * 是否已经联网
@@ -143,15 +158,6 @@ import { moduleName } from './config'
 //   } else {
 //     return 1
 //   }
-// }
-
-/**
- * 获取联系人
- *
- */
-// function getContacts(callback) {
-//   console.log('call native getContacts', callback.name)
-//   eventCenter.getContacts(callback)
 // }
 
 /**
@@ -207,26 +213,26 @@ export const getDownloadItemCount = () => {
 /**
  *   打开下载管理页面
  */
-// function openDownloadPage() {
-//   console.log('call native openDownloadList')
-//   if (top.wdobject) {
-//     return top.wdobject.openDownloadList()
-//   } else {
-//     MessageBox('提示', '调用原生下载界面')
-//   }
-// }
+export const openDownloadPage = () => {
+  console.log('call native openDownloadList')
+  if (top.wdobject) {
+    return top.wdobject.openDownloadList()
+  } else {
+    MessageBox('提示', '调用原生下载界面')
+  }
+}
 
 /**
  *   添加下载项到下载队列
  */
-// function addDownloadItem(itemTitle, itemUrl, detailPageUrl) {
-//   console.log('call native addDownloadItemUrlWithDetail', itemTitle, itemUrl, detailPageUrl)
-//   if (top.wdobject) {
-//     return top.wdobject.addDownloadItemUrlWithDetail(itemTitle, itemUrl, detailPageUrl)
-//   } else {
-//     return 0
-//   }
-// }
+export const addDownloadItem = (itemTitle, itemUrl, detailPageUrl) => {
+  console.log('call native addDownloadItemUrlWithDetail', itemTitle, itemUrl, detailPageUrl)
+  if (top.wdobject) {
+    return top.wdobject.addDownloadItemUrlWithDetail(itemTitle, itemUrl, detailPageUrl)
+  } else {
+    MessageBox('提示', '调用原生下载')
+  }
+}
 
 /**
  * 拨打电话
@@ -243,12 +249,6 @@ export const getDownloadItemCount = () => {
 //   }
 // }
 
-// var playMediaType = {
-//   float: 1, //悬浮
-//   history: 2, //历史会议播放
-//   live: 3 //直播会议
-// }
-
 /**
  * 播放音频
  *
@@ -257,14 +257,25 @@ export const getDownloadItemCount = () => {
  * @param detailPageUrl 详情页Url
  * @param type      1 悬浮 2 历史会议播放 3 直播会议
  */
-// function playMedia(titleName, mediaUrl, detailPageUrl, type) {
-//   console.log('call native playMedia', titleName, mediaUrl, detailPageUrl, type)
-//   if (top.wdobject) {
-//     top.wdobject.playMedia(ModuleName, titleName, mediaUrl, detailPageUrl, type)
-//   } else {
-//     MessageBox('提示', mediaUrl + titleName)
-//   }
-// }
+export const playMedia = (titleName, mediaUrl, detailPageUrl, type) => {
+  console.log('call native playMedia', titleName, mediaUrl, detailPageUrl, type)
+  if (top.wdobject) {
+    top.wdobject.playMedia(moduleName, titleName, mediaUrl, detailPageUrl, type)
+  } else {
+    MessageBox('提示', mediaUrl + titleName)
+  }
+}
+
+// 播放器错误回调
+export const registerMediaPlayerErrorCode = (callback) => {
+  console.log('call native registerMediaPlayerErrorCode')
+  if (top.wdobject) {
+    top.wdobject.registerMediaPlayerErrorCode(callback)
+  } else {
+    var content = JSON.stringify(mediaPlayErrorCode)
+    MessageBox('播放错误回调', content)
+  }
+}
 
 /**
  * 更新播放器的view的模式
@@ -305,12 +316,12 @@ export const getDownloadItemCount = () => {
  *  停止播放音频
  *  有些页面退出需要停止音频
  */
-// function stopMedia() {
-//   console.log('call native stopMedia')
-//   if (top.wdobject) {
-//     top.wdobject.stopMedia(ModuleName)
-//   }
-// }
+export const stopMedia = () => {
+  console.log('call native stopMedia')
+  if (top.wdobject) {
+    top.wdobject.stopMedia(moduleName)
+  }
+}
 
 /**
  * 分享（待扩展，以前分享只有弹出浮层，没有具体指定到哪个三方平台）
@@ -368,14 +379,14 @@ export const getDownloadItemCount = () => {
 /**
  * PDF阅读器
  */
-// function pdfReader(title, url) {
-//   console.log('call native pdfReader', title, url)
-//   if (top.wdobject) {
-//     top.window.wdobject.pdfReader(title, url)
-//   } else {
-//     MessageBox('提示', title + url)
-//   }
-// }
+export const pdfReader = (title, url) => {
+  console.log('call native pdfReader', title, url)
+  if (top.wdobject) {
+    top.window.wdobject.pdfReader(title, url)
+  } else {
+    MessageBox('提示', title + url)
+  }
+}
 
 /**
  * 获取SessionId
@@ -470,5 +481,23 @@ export const openWebView = (isBackTitle, title, url, useNative) => {
     top.wdobject.shell_Req(JSON.stringify(params))
   } else {
     MessageBox('提示', title + url)
+  }
+}
+
+/**
+ * 关闭当前WebView
+ *
+ * 调用现有接口
+ * params = {"operate":"back",}
+ * shell_Req(params)
+ */
+export const closeWebView = (back) => {
+  console.log('call native closeWebView')
+  if (top.wdobject) {
+    var params = {
+      'operate': 'back'
+    }
+    top.wdobject.shell_Req(JSON.stringify(params))
+  } else if (back) {
   }
 }

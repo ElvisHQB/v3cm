@@ -38,7 +38,9 @@
   import {genMeetingInfoListItem} from '../../common/js/utils'
   import {getOfflineMeetingListUrl} from '../../api/config'
   import api from '../../api/fetchData'
-  import * as ERR_CODE from '../../api/errorCode'
+  import ERR_CODE from '../../api/errorCode'
+  import { closeWebView } from '../../api/native'
+  import { SET_MEETINGINFO_LIST } from '../../store/mutation-types'
 
   const meetingInfoCategory = ['类型', '地点', '时间']
   const meetingInfoDetail = [['全部', '宏观经济', '高峰论坛', '行业会议', '业绩发布会', '学术会议', '其他会议'],
@@ -60,7 +62,11 @@
       this.searchVal.endTime = startTime.format('yyyyMMdd')
       this._getMeetingInfo(1)
     },
-    computed: {},
+    computed: {
+      meetingInfo() {
+        return this.$store.getters.meetingInfoList
+      }
+    },
     data() {
       return {
         meetingInfoTitle: meetingInfoCategory,
@@ -82,8 +88,7 @@
           meetingCategory: '',
           startTime: '',
           endTime: ''
-        },
-        meetingInfo: []
+        }
       }
     },
     methods: {
@@ -163,16 +168,30 @@
             }
             // 对上拉下拉的处理
             if (currentPage === 1) {
-              this.meetingInfo = meetingList
-              console.log(this.meetingInfo)
+              this.$store.commit(SET_MEETINGINFO_LIST, meetingList)
             } else {
-              this.meetingInfo = this.meetingInfo.concat(meetingList)
+              this.$store.commit(SET_MEETINGINFO_LIST, this.meetingInfo.concat(meetingList))
             }
             // TODO mutation state
             console.log('____log______')
           }).catch((e) => {
-            console.log(e)
-            console.log(ERR_CODE)
+            console.log(e.response)
+            let response = e.response.data ? e.response.data : false
+            if (response && response.errorMsg) {
+              if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
+                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              } else {
+                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              }
+            } else {
+              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                closeWebView(true)
+              })
+            }
           })
       }
     },
@@ -201,7 +220,8 @@
       position: fixed;
       width: 100%;
       top: 44px;
-      z-index: 9999;
+      z-index: 99;
+      border-bottom: 2px solid #efeff4;
     }
 
     .pull-bottom-wrapper {

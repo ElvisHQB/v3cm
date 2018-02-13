@@ -6,9 +6,9 @@
         <span>基本信息</span>
       </div>
       <div class="content">
-        <div class="meeting-time">{{ meetingTime }}</div>
+        <div class="meeting-time">{{ meetingDetail.meetingTime }}</div>
         <div class="speakers">
-          <p v-for="(speaker, index) in meetingDetail.lecturers" v-bind:key="index">{{ speaker.name + '(' + speaker.title + ')' }}</p>
+          <p v-for="(speaker, index) in meetingDetail.lecturers" v-bind:key="index">{{ speaker.intro }}</p>
         </div>
         <div class="sponsors">
           <p v-for="(sponsor, index) in meetingDetail.sponsors" v-bind:key="index">{{ sponsor.name }}</p>
@@ -46,29 +46,20 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { genMeetingTime } from '../../common/js/utils'
   export default {
     name: 'meetingIntro',
-    props: {
-      meetingDetail: {
-        type: Object,
-        default: function () {
-          return {}
-        }
-      }
-    },
     data() {
       return {
-        //
       }
     },
     computed: {
-      meetingTime() {
-        return genMeetingTime(this.meetingDetail.startTime, this.meetingDetail.endTime)
+      meetingDetail() {
+        return this.$store.getters.meetingDetail
       }
     },
     methods: {
-      //
+    },
+    watch: {
     }
   }
 </script>

@@ -16,6 +16,11 @@
         type: Boolean,
         default: true
       },
+      //滚动超过边缘的回弹动画
+      bounce: {
+        type: Boolean,
+        default: false
+      },
       data: {
         type: Array,
         default: function () {
@@ -35,8 +40,10 @@
         }
         this.scroll = new BScroll(this.$refs.wrapper, {
           probeType: this.probeType,
-          click: this.click
+          click: this.click,
+          bounce: this.bounce
         })
+//        console.log(this.scroll)
       },
       enable() {
         this.scroll && this.scroll.enable()

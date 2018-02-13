@@ -10,6 +10,7 @@ import PublishedMeeting from 'components/personalCenter/publishedMeeting/publish
 import PrivateMeeting from 'components/personalCenter/privateMeeting/privateMeeting'
 import MyCollection from 'components/personalCenter/myCollection/myCollection'
 import LatestPlay from 'components/personalCenter/latestPlay/latestPlay'
+import MeetingDetail from 'components/meetingDetail/meetingDetail'
 import SelectAttendance from 'components/selectAttendance/selectAttendance'
 
 Vue.use(Router)
@@ -29,6 +30,11 @@ export default new Router({
       component: HistoryMeeting
     },
     {
+      path: '/meetingDetail/:meetingId',
+      name: 'meetingDetail',
+      component: MeetingDetail
+    },
+    {
       path: '/meetingInfo',
       component: MeetingInfo
     },
@@ -43,13 +49,6 @@ export default new Router({
     {
       path: '/createMeeting',
       component: CreateMeeting
-      // children: [
-      //   {
-      //     // name: 'selectAttendance',
-      //     path: 'selectAttendance',
-      //     component: SelectAttendance
-      //   }
-      // ]
     },
     {
       path: '/selectAttendance',

@@ -1,82 +1,63 @@
 <template>
-    <div>
-      <contact-list :data="data"></contact-list>
-    </div>
+  <div class="iWand-contact">
+    <contact-list :contactType="contactType.iWand"></contact-list>
+  </div>
 </template>
 <script type="text/ecmascript-6">
+  import ContactList from '../../base/contactList/contactList'
+  import { CONTACT_TYPE, getUserListGroupUrl, getUserAvatarUrl } from '../../api/config'
+  import api from '../../api/fetchData'
+  import { SET_IWAND_CONTACT_LIST } from '../../store/mutation-types'
+  import { genIWandContactList } from '../../common/js/utils'
 
   export default {
     components: {
+      ContactList
+    },
+    created() {
+      this.contactType = CONTACT_TYPE
+      this._getUserListGroup()
     },
     data() {
       return {
-        data: [
-          {
-            'key': 'B',
-            'userList': [
-              {
-                'userName': '边书婷',
-                'company': 'Wind'
-              },
-              {
-                'userName': '斌斌',
-                'company': 'Wind'
-              }
-            ]
-          },
-          {
-            'key': 'S',
-            'userList': [
-              {
-                'userName': 'SWT',
-                'company': 'Wind'
-              },
-              {
-                'userName': '苏苏',
-                'company': 'other'
-              }
-            ]
-          },
-          {
-            'key': 'K',
-            'userList': [
-              {
-                'userName': 'kylin',
-                'company': 'other'
-              },
-              {
-                'userName': 'KK',
-                'company': 'other'
-              }
-            ]
-          },
-          {
-            'key': 'Z',
-            'userList': [
-              {
-                'userName': 'ZQL',
-                'company': 'xixi'
-              },
-              {
-                'userName': '张三',
-                'company': 'other'
-              }
-            ]
-          },
-          {
-            'key': 'Y',
-            'userList': [
-              {
-                'userName': 'YY',
-                'company': 'Wind'
-              },
-              {
-                'userName': 'YHH',
-                'company': 'other'
-              }
-            ]
+      }
+    },
+    methods: {
+      _getUserListGroup() {
+        const url = getUserListGroupUrl
+        let params = {
+          type: 1
+        }
+        api.getData(url, 'get', { params: params })
+          .then((res) => {
+            this._getUserAvatar(res)
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      _getUserAvatar(userListGroup) {
+        const url = getUserAvatarUrl
+        let imUserId = (userListGroup) => {
+          let arr = []
+          for (let users of userListGroup) {
+            for (let u of users.userList) {
+              arr.push(u.iMID)
+            }
           }
-        ]
+          return arr
+        }
+        let params = {
+          imUserId: imUserId(userListGroup)
+        }
+        api.getData(url, 'post', params)
+          .then((res) => {
+            let users = genIWandContactList(userListGroup, res)
+            this.$store.commit(SET_IWAND_CONTACT_LIST, users)
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       }
     }
   }

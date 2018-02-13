@@ -1,12 +1,20 @@
 import axios from 'axios'
+import {Toast} from 'mint-ui'
+import ERR_CODE from './errorCode'
 
 axios.defaults.headers.post['Content-Type'] = 'application/json'
+axios.defaults.timeout = 10000
 
 // 请求拦截器
 axios.interceptors.request.use(function (config) {
   console.log(config)
   return config
 }, function (error) {
+  Toast({
+    message: ERR_CODE.TIME_OUT.MSG,
+    position: 'bottom',
+    duration: 800
+  })
   return Promise.reject(error)
 })
 // 响应拦截器

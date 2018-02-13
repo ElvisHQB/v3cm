@@ -1,5 +1,5 @@
 <template>
-  <div class="meeting-info-list" @click="_openMeetingInfo()">
+  <div class="meeting-info-list" @click="_openMeetingInfo(item.url, item.id)">
     <div class="meeting-info-list-main">
       <div class="meeting-info-list-title">{{item.title}}</div>
       <p>{{item.city}} {{item.date}}</p>
@@ -13,6 +13,8 @@
 
 <script type="text/ecmascript-6">
   import { openWebView } from '../../api/native'
+  import { getMeetingInfoDetail } from '../../api/config'
+  import api from '../../api/fetchData'
 
   export default {
     name: 'meeting-info-list',
@@ -29,10 +31,25 @@
       }
     },
     methods: {
-      _openMeetingInfo() {
-        openWebView(true, this.item.title, this.item.url, true)
+      _openMeetingInfo(url, id) {
+        if (url) {
+          openWebView(true, this.item.title, url, true)
+        } else {
+          this._getMeetingInfoDetail(id)
+        }
+      },
+      _getMeetingInfoDetail(id) {
+        const url = getMeetingInfoDetail
+        let params = {
+          'meetingId': id
+        }
+        return api.getData(url, 'get', params)
+          .then((res) => {
+            openWebView(true, res.title, res.url, true)
+          }).catch((e) => {
+          })
       }
-    }
+      }
   }
 </script>
 

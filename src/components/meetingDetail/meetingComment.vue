@@ -4,8 +4,8 @@
     <div class="comment-list">
       <div v-for="(comment, index) in commentList" v-bind:key="index" class="comment-item">
         <p class="comment-title">
-          <span class="comment-name">{{ comment.author.name }}</span>
-          <span class="comment-time">{{ _getCommentTime(comment.commentTime) }}</span>
+          <span class="comment-name">{{ comment.authorName }}</span>
+          <span class="comment-time">{{ comment.commentTime }}</span>
         </p>
         <p class="comment-content">{{ comment.content }}</p>
       </div>
@@ -42,24 +42,11 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { getTimeFormatText } from '../../common/js/utils'
   import { commentMeetingUrl } from '../../api/config'
   import { Toast } from 'mint-ui'
   import api from 'api/fetchData'
   export default {
     name: 'meetingComment',
-    props: {
-      meetingId: {
-        type: Number,
-        default: 0
-      },
-      commentList: {
-        type: Array,
-        default: function () {
-          return []
-        }
-      }
-    },
     data() {
       return {
         'commentPopup': false,
@@ -67,6 +54,14 @@
         'currentCount': 0,
         'maxCount': 140,
         'countExceed': false
+      }
+    },
+    computed: {
+      commentList() {
+        return this.$store.getters.commentList
+      },
+      meetingDetail() {
+        return this.$store.getters.meetingDetail
       }
     },
     methods: {
@@ -81,10 +76,6 @@
             duration: 3000
           })
         }
-      },
-      _getCommentTime(commentTime) {
-        let date = new Date(commentTime)
-        return getTimeFormatText(date)
       },
       _togglePopUp() {
         this.commentPopup = true
@@ -101,7 +92,7 @@
           isAnonymous: false,
           parentCommentId: '',
           meeting: {
-            id: this.meetingId
+            id: this.meetingDetail.id
           }
         }
         console.log(this.commentContent)

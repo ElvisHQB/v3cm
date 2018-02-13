@@ -13,10 +13,12 @@
 <script type="text/ecmascript-6">
   import selector from '../../base/selector/selector'
   import ScrollList from '../../base/scrollList/scrollList'
-  import {genMeetingListItem} from '../../common/js/utils'
+  import { Meeting } from '../../common/js/utils'
   import {getHistoryMeetingUrl} from '../../api/config'
   import api from '../../api/fetchData'
-  import * as ERR_CODE from '../../api/errorCode'
+  import ERR_CODE from '../../api/errorCode'
+  import {SET_HISTORY_MEETING_LIST} from '../../store/mutation-types'
+  import { closeWebView } from '../../api/native'
 
   const hisCategory = ['类型', '领域']
   const hisDetail = [['全部', 'IR路演', '分析师路演', '产品项目路演', '论坛峰会', '金融培训', '策略会', '其他'], ['全部', '宏观经济', '策略研究', '固定收益', '非银金融', '房地产', '文化传播', '计算机', '医药生物', '通讯电子',
@@ -36,7 +38,11 @@
     mounted() {
       this._getHistoryMeeting(1)
     },
-    computed: {},
+    computed: {
+      historyMeeting() {
+        return this.$store.getters.historyMeetingList
+      }
+    },
     data() {
       return {
         hisTitle: hisCategory,
@@ -46,7 +52,6 @@
           category: hisDetailValue[0][0],
           field: hisDetailValue[1][0]
         },
-        historyMeeting: [],
         currentPage: 1,
         // TODO 分页大小，可配置？
         pageSize: 10,
@@ -79,26 +84,38 @@
           .then((res) => {
             let meetingList = []
             for (let meeting of res.list) {
-              let meetingItem = genMeetingListItem(meeting)
+              // let meetingItem = genMeetingListItem(meeting)
+              let meetingItem = new Meeting(meeting)
               meetingList.push(meetingItem)
             }
             // 没有更多数据
-            if (meetingList.length < this.pageSize) {
-              this.noMoreData = true
-            } else {
-              this.noMoreData = false
-            }
+            this.noMoreData = meetingList.length < this.pageSize
             // 对上拉下拉的处理
             if (currentPage === 1) {
-              this.historyMeeting = meetingList
+              this.$store.commit(SET_HISTORY_MEETING_LIST, meetingList)
             } else {
-              this.historyMeeting = this.historyMeeting.concat(meetingList)
+              this.$store.commit(SET_HISTORY_MEETING_LIST, this.historyMeeting.concat(meetingList))
             }
             // TODO mutation state
             console.log('____log______')
           }).catch((e) => {
-            console.log(e)
-            console.log(ERR_CODE)
+            console.log(e.response)
+            let response = e.response.data ? e.response.data : false
+            if (response && response.errorMsg) {
+              if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
+                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              } else {
+                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              }
+            } else {
+              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                closeWebView(true)
+              })
+            }
           })
       }
     },
@@ -126,6 +143,8 @@
       position: fixed;
       width: 100%;
       top: 44px;
+      z-index: 99;
+      border-bottom: 2px solid #efeff4;
     }
 
   }

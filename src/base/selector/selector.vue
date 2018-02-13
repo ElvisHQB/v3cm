@@ -15,6 +15,9 @@
           <button class="default" v-for="(n, indexDetail) in item" :key="n" @click="_chooseThis(n,index,indexDetail)">
             {{n}}
           </button>
+          <!--TODO-->
+          <!--<div style="height: 100px; background-color: lightgray; opacity: 0.2">-->
+          <!--</div>-->
         </div>
       </div>
     </transition-group>
@@ -120,7 +123,6 @@
     .selector-list-wrap {
 
       .selector-list {
-        margin-top: 5px;
         background-color: white;
         width: 100%;
         position: absolute;

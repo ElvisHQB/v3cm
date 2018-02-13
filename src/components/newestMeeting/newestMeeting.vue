@@ -19,10 +19,11 @@
 <script type="text/ecmascript-6">
   import { getLatestMeetingUrl } from 'api/config'
   import api from 'api/fetchData'
-  import * as ERR_CODE from '../../api/errorCode'
+  import ERR_CODE from '../../api/errorCode'
   import ScrollList from '../../base/scrollList/scrollList'
   import { genMeetingListItem } from '../../common/js/utils'
-//  import { SET_NEWEST_MEETING_LIST } from '../../store/mutation-types'
+  import { SET_NEWEST_MEETING_LIST } from '../../store/mutation-types'
+  import { closeWebView } from '../../api/native'
 
   export default {
     name: 'newestMeeting',
@@ -60,7 +61,6 @@
     },
     methods: {
       _getNewestMeeting(currentPage, pageSize) {
-        if (this.noMoreData) return
         this.currentPage = currentPage
         const url = getLatestMeetingUrl
         let params = {
@@ -75,20 +75,34 @@
           .then((res) => {
             let meetingList = []
             for (let meeting of res.list) {
-              let meetingItem = genMeetingListItem(meeting)
-              meetingList.push(meetingItem)
+              meetingList.push(genMeetingListItem(meeting))
             }
             // 没有更多数据
             this.noMoreData = meetingList.length < pageSize
-            // 对上拉下拉的处理
+            //对上拉下拉的处理
             if (currentPage === 1) {
-//              this.$store.commit(SET_NEWEST_MEETING_LIST, meetingList)
+              this.$store.commit(SET_NEWEST_MEETING_LIST, meetingList)
             } else {
-//              this.$store.commit(SET_NEWEST_MEETING_LIST, this.newestMeeting.concat(meetingList))
+              this.$store.commit(SET_NEWEST_MEETING_LIST, this.newestMeeting.concat(meetingList))
             }
         }).catch((e) => {
-          console.log(e)
-          console.log(ERR_CODE)
+          console.log(e.response)
+          let response = e.response.data ? e.response.data : false
+          if (response && response.errorMsg) {
+            if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
+              this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                closeWebView(true)
+              })
+            } else {
+              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                closeWebView(true)
+              })
+            }
+          } else {
+            this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+              closeWebView(true)
+            })
+          }
         })
       }
     }

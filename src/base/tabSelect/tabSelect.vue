@@ -44,6 +44,7 @@
   $meeting-title-height: 50px;
   $player-height: 80px;
   .tab-select {
+    flex-direction: column;
     .tab-bar {
       .tab-bar-nav {
         display: flex;

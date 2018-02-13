@@ -24,22 +24,26 @@
     <div class="header-right">
       <!--发起会议-->
       <div v-if="renderHeader.right === 1" class="create-meeting-btn" @click="_createMeeting">
-        <div class="icon-select"><i class="icon-add-o"></i></div>
+        <span class="icon-select"><i class="icon-add-o"></i></span>
       </div>
       <!--搜索会议-->
       <div v-if="renderHeader.right === 2" class="search-meeting-btn" @click="_searchMeeting">
         <span class="icon-select"><i class="icon-fangdajing"></i></span>
       </div>
       <!--更多详情-->
-      <div v-if="renderHeader.right === 3" class="more-info">
-        <div class="icon-select"><i class="icon-gengduo"></i></div>
+      <div v-if="renderHeader.right === 3" class="more-info" @click="clickOnMoreDetail">
+        <span class="icon-select"><i class="icon-gengduo"></i></span>
+      </div>
+      <!--选择参会人完成-->
+      <div v-if="renderHeader.right === 4" class="select-attendance-complete" @click="clickOnCompleteBtn">
+        <span :class="[{ active: hasSelectedAttendance }, 'complete-btn']">{{ renderHeader.rightValue }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import { SET_SEARCH_STR } from '../../store/mutation-types'
+  import { SET_SEARCH_STR, SET_MORE_DETAIL_POPUP, CLEAR_ATTENDANCE_LIST } from '../../store/mutation-types'
   export default {
     name: 'commonHeader',
     data() {
@@ -50,13 +54,24 @@
           'center': 1,
           // 0:none;1:create-meeting-btn;2:search-meeting-btn;3:more-info
           'right': 1,
-          'titleValue': ''
+          'titleValue': '',
+          'rightValue': '完成'
         },
-        searchStr: ''
+        searchStr: '',
+        hasSelectedAttendance: false
+      }
+    },
+    computed: {
+      attendanceList() {
+        return this.$store.getters.attendanceList
       }
     },
     methods: {
       _goBack() {
+        let createMeeting = /^(\/createMeeting)$/
+        if (createMeeting.test(this.$route.path)) {
+          this.$store.commit(CLEAR_ATTENDANCE_LIST)
+        }
         this.$router.back()
       },
       _clickOnSearch() {
@@ -69,6 +84,13 @@
       },
       _createMeeting() {
         this.$router.push({ path: '/createMeeting' })
+      },
+      clickOnMoreDetail() {
+        this.$store.commit(SET_MORE_DETAIL_POPUP, true)
+      },
+      clickOnCompleteBtn() {
+        if (!this.hasSelectedAttendance) return
+        this.$router.back()
       }
     },
     // Vue实例调用$watch方法，创建watcher
@@ -81,26 +103,23 @@
       //watch路由变化，根据路由渲染common header
       '$route': {
         handler: function () {
+          //路由变化，清空搜索框
+          this.searchStr = ''
           // TODO 可配置
           const regex1 = /^(\/newestMeeting)|(\/historyMeeting)|(\/meetingInfo)$/
           const regex2 = /^(\/personalCenter)$/
           const regex3 = /^(\/search)$/
-          const regex4 = /^(\/createMeeting)$/
-          const regex5 = /^(\/selectAttendance)$/
+          const createMeeting = /^(\/createMeeting)$/
+          const selectAttendance = /^(\/selectAttendance)$/
           const regex6 = /^(\/personalCenter\/publishedMeeting)$/
           const regex7 = /^(\/personalCenter\/privateMeeting)$/
           const regex8 = /^(\/personalCenter\/myCollection)$/
           const regex9 = /^(\/personalCenter\/latestPlay)$/
+          const meetingDetail = /^\/meetingDetail\/((?:[^/]+?))(?:\/(?=$))?$/i
           if (regex1.test(this.$route.path)) {
             this.renderHeader.center = 1
             this.renderHeader.right = 1
           }
-//          if (meetingDetail.test(this.$route.path)) {
-//            console.log('detail')
-//            this.renderHeader.center = 2
-//            this.renderHeader.right = 3
-//            this.renderHeader.titleValue = '详情'
-//          }
           if (regex2.test(this.$route.path)) {
             this.renderHeader.center = 2
             this.renderHeader.right = 0
@@ -110,14 +129,14 @@
             this.renderHeader.center = 1
             this.renderHeader.right = 2
           }
-          if (regex4.test(this.$route.path)) {
+          if (createMeeting.test(this.$route.path)) {
             this.renderHeader.center = 2
             this.renderHeader.right = 0
             this.renderHeader.titleValue = '发起会议'
           }
-          if (regex5.test(this.$route.path)) {
+          if (selectAttendance.test(this.$route.path)) {
             this.renderHeader.center = 2
-            this.renderHeader.right = 0
+            this.renderHeader.right = 4
             this.renderHeader.titleValue = '选择参会人'
           }
           if (regex6.test(this.$route.path)) {
@@ -140,14 +159,32 @@
             this.renderHeader.right = 0
             this.renderHeader.titleValue = '最近播放'
           }
+          if (meetingDetail.test(this.$route.path)) {
+            this.renderHeader.center = 2
+            this.renderHeader.right = 3
+            this.renderHeader.titleValue = '详情'
+          }
 //          this.searchStr = ''
         },
         // 创建watcher是就执行一次handler方法
         immediate: true
+      },
+      '$store.getters.searchStr': function () {
+        this.searchStr = this.$store.getters.searchStr
+      },
+      'attendanceList': {
+        handler: function () {
+          let len = this.attendanceList.iWandList.length + this.attendanceList.phoneList.length
+          if (len > 0) {
+            this.hasSelectedAttendance = true
+            this.renderHeader.rightValue = '完成(' + len + ')'
+          } else {
+            this.hasSelectedAttendance = false
+            this.renderHeader.rightValue = '完成'
+          }
+        },
+        deep: true
       }
-//      '$store.getters.searchStr': function () {
-//        this.searchStr = this.$store.getters.searchStr
-//      }
     }
   }
 </script>
@@ -156,6 +193,7 @@
   @import "../../common/scss/variable";
   $header-height: 45px;
   $touch-icon-width: 45px;
+  $main-text-color: #fff;
   //$dd:rgba(0,0,0,.1);
   .common-header {
     display: flex;
@@ -165,13 +203,13 @@
     color: $color-text-ll;
     background-color: $color-theme;
     .header-left {
-      flex: 1;
+      flex: 1.5;
       .icon-back-btn {
-
+        //
       }
     }
     .header-center {
-      flex: 8;
+      flex: 7;
       display: flex;
       justify-content: center;
       justify-items: center;
@@ -185,7 +223,7 @@
           border-radius: 4px;
           text-indent: 10px;
           outline: none;
-          color: #fff;
+          color: $main-text-color;
           font-size: 16px;
           background-color: rgba(0,0,0,.1);
           /*-webkit-appearance: none;*/
@@ -196,11 +234,11 @@
       }
       .title {
         font-size: 17px;
-        color: #fff;
+        color: $main-text-color;
       }
     }
     .header-right {
-      flex: 1;
+      flex: 1.5;
       display: inline-block;
       height: 45px;
       line-height: 45px;
@@ -211,55 +249,27 @@
         //
       }
       .more-info {
-        //
+        color: $main-text-color;
+      }
+      .select-attendance-complete {
+        font-size: 14px;
+        .complete-btn {
+          display: inline-block;
+          height: $header-height;
+          width: 100%;
+        }
+        .active {
+          color: $main-text-color;
+        }
       }
     }
     .icon-select {
       display: inline-block;
-      width: $touch-icon-width;
+      //width: $touch-icon-width;
+      width: 100%;
       height: $header-height;
       line-height: $header-height;
       text-align: center;
     }
   }
-  /*
-  .common-header {
-    display: flex;
-    height: $header-height;
-    line-height: $header-height;
-    color: $color-text-ll;
-    background-color: $color-theme;
-    .icon-back-btn {
-      flex: 1;
-    }
-    .search {
-      flex: 6;
-      display: inline-block;
-      vertical-align: top;
-      width: 70%;
-      height: 45px;
-      line-height: 45px;
-      input {
-        display: inline-block;
-        width: 100%;
-        height: $header-height / 2;
-        line-height: $header-height / 2;
-      }
-    }
-    .create-meeting-btn {
-      flex: 1;
-      display: inline-block;
-      vertical-align: top;
-      height: 45px;
-      line-height: 45px;
-    }
-  }
-  .icon-select {
-    display: inline-block;
-    width: $touch-icon-width;
-    height: $header-height;
-    line-height: $header-height;
-    text-align: center;
-  }
-  */
 </style>

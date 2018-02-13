@@ -17,12 +17,13 @@
       <!--搜索结果列表-->
       <div v-if="hasResult">
         <!--搜索结果列表-->
-        <!--TODO -->
-        <scroll-list :listData="searchedMeeting" :noMore="noMore" v-on:loadTop="_searchMeeting(searchStr, 1)"
-                     v-on:loadBottom="_searchMeeting(searchStr, currentPage + 1)"></scroll-list>
+        <scroll-list :listData="searchMeeting" :noMore="noMoreData"
+                     v-on:loadTop="_searchMeeting(searchStr, firstPage, pageSize)"
+                     v-on:loadBottom="_searchMeeting(searchStr, currentPage + 1, pageSize)">
+        </scroll-list>
       </div>
       <!--无结果的空列表-->
-      <div v-else class="empty-result-list">
+      <div class="empty-result-list" v-else>
         <span>没有搜索到相关会议</span>
       </div>
     </div>
@@ -33,7 +34,7 @@
   import ScrollList from '../../base/scrollList/scrollList'
   import { searchMeetingUrl } from 'api/config'
   import api from 'api/fetchData'
-  //import { SET_SEARCH_STR } from '../../store/mutation-types'
+  import { SET_SEARCH_MEETING_LIST, SET_SEARCH_STR } from '../../store/mutation-types'
   import { genMeetingListItem } from '../../common/js/utils'
 
   export default {
@@ -44,19 +45,20 @@
     data() {
       return {
         // 搜索会议结果列表
-        searchedMeeting: [],
+//        searchedMeeting: [],
         histories: [],
         // 是否进行的搜索动作
         searched: false,
         hasResult: true,
         pageSize: 10,
+        firstPage: 1,
         currentPage: 1,
         noMoreData: false,
         searchStr: ''
       }
     },
     created() {
-      this.init()
+      this._initSearchHistory()
     },
     computed: {
       // 搜索历史不为空且还没进行搜索，渲染显示搜索历史
@@ -65,10 +67,16 @@
       },
       noMore() {
         return this.hasResult && this.noMoreData
+      },
+      searchMeeting() {
+        return this.$store.getters.searchMeetingList
       }
     },
     methods: {
-      init() {
+      _initSearchHistory() {
+        this.searched = false
+        this.hasResult = true
+        this.noMoreData = false
         this._getHistory()
       },
       //获取搜索历史
@@ -99,11 +107,12 @@
       },
       //点击历史搜索进行搜索
       _searchHistory(item) {
-//        this.$store.commit(SET_SEARCH_STR, item)
-        this._searchMeeting(item, 1)
+        this.$store.commit(SET_SEARCH_STR, item)
+        this._searchMeeting(item, this.firstPage, this.pageSize)
       },
       //搜索会议
-      _searchMeeting(searchStr, currentPage) {
+      _searchMeeting(searchStr, currentPage, pageSize) {
+        this.currentPage = currentPage
         this.searched = true
         this._setHistory(searchStr)
         const url = searchMeetingUrl
@@ -116,27 +125,25 @@
             'sponsor': searchStr
           },
           'isPaging': true,
-          'pageSize': this.pageSize,
+          'pageSize': pageSize,
           'currentPage': currentPage
         }
-        return api.getData(url, 'post', params)
+        api.getData(url, 'post', params)
           .then((res) => {
             if (res.count <= 0) {
               this.hasResult = false
-            } else if (res.count <= 10) {
-              this.noMoreData = true
             }
             let meetingList = []
             for (let meeting of res.list) {
               let meetingItem = genMeetingListItem(meeting)
               meetingList.push(meetingItem)
             }
+            this.noMoreData = meetingList.length < pageSize
             if (currentPage === 1) {
-              this.searchedMeeting = meetingList
+              this.$store.commit(SET_SEARCH_MEETING_LIST, meetingList)
             } else {
-              this.searchedMeeting = this.searchedMeeting.concat(meetingList)
+              this.$store.commit(SET_SEARCH_MEETING_LIST, this.searchMeeting.concat(meetingList))
             }
-//            this.$store.commit(SET_SEARCH_MEETING_LIST, {meetingList: meetingList})
           }).catch((e) => {
             console.log(e)
           })
@@ -146,12 +153,12 @@
       //搜索字符串变化，调用搜索
       '$store.getters.searchStr': function () {
         this.searchStr = this.$store.getters.searchStr
-        this._searchMeeting(this.searchStr, 1)
+        this._searchMeeting(this.searchStr, 1, this.pageSize)
       }
     },
     // keep alive会通过将实例在activated和deactivated中切换来缓存组件的Vue实例，而不会销毁。
     activated () {
-      this.searched = false
+      this._initSearchHistory()
     }
   }
 </script>
