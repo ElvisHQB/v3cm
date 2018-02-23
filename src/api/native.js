@@ -56,6 +56,10 @@ const CONTACTS = [{
   {
     'FamilyName': '自由人',
     'Phone': ['13912340007']
+  },
+  {
+    'FamilyName': 'Kafka',
+    'Phone': ['13912340007']
   }
 ]
 

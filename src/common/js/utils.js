@@ -474,6 +474,8 @@ export const genIWandContactList = (userListGroup, userAvatarList) => {
       u.name = user.userName
       //手机号
       u.phoneNum = user.mobilePhone
+      //imId
+      u.imId = user.iMID
       //公司
       u.company = user.company
       //头像
@@ -483,4 +485,16 @@ export const genIWandContactList = (userListGroup, userAvatarList) => {
     users.userList = arr
   }
   return userListGroup
+}
+
+//判断中文开始
+export const isStartWithChinese = (str) => {
+  const regex = /^[\u4e00-\u9fa5]+.*?$/
+  return regex.test(str)
+}
+
+//判断英文开始
+export const isStartWithEnglish = (str) => {
+  const regex = /^[a-zA-Z0-9_]+.*?$/
+  return regex.test(str)
 }

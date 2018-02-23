@@ -12,12 +12,13 @@
       <div class="selector-list-wrap" transiton="fade" key="1">
         <div ref="seList" class="selector-list" v-for="(item,index) in subTitle" :key="index" :id="index"
              v-show="isShow[index]">
-          <button class="default" v-for="(n, indexDetail) in item" :key="n" @click="_chooseThis(n,index,indexDetail)">
+          <button class="selector-list-button" v-for="(n, indexDetail) in item" :key="n"
+                  @click="_chooseThis(n,index,indexDetail)">
             {{n}}
           </button>
-          <!--TODO-->
-          <!--<div style="height: 100px; background-color: lightgray; opacity: 0.2">-->
-          <!--</div>-->
+        </div>
+        <div class="selector-shadow" v-for="(item,index) in subTitle" :key="item.id" v-show="isShow[index]"
+        v-bind:style="{height: height + 'px'}">
         </div>
       </div>
     </transition-group>
@@ -31,7 +32,8 @@
     data() {
       return {
         isShow: [],
-        storeTitle: []
+        storeTitle: [],
+        height: window.innerHeight
       }
     },
     props: {
@@ -125,10 +127,8 @@
       .selector-list {
         background-color: white;
         width: 100%;
-        position: absolute;
-        z-index: 9999;
 
-        .default {
+        .selector-list-button {
           height: 28px;
           padding: 0 8px;
           margin: 7px 5px;
@@ -136,6 +136,12 @@
           border: 1px solid lightgray;
           border-radius: 5px;
         }
+      }
+
+      .selector-shadow {
+        background-color: rgba(0, 0, 0, 0.47);
+        z-index: 99;
+        opacity: 0.4;
       }
     }
   }

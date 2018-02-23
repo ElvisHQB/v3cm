@@ -1,5 +1,4 @@
 import * as types from './mutation-types'
-import {CONTACT_TYPE} from '../api/config'
 
 const mutations = {
   [types.SET_USER_INFO](state, userInfo) {
@@ -55,36 +54,22 @@ const mutations = {
   },
   //清空整个attendanceList
   [types.CLEAR_ATTENDANCE_LIST](state) {
-    state.attendanceList.iWandList = []
-    state.attendanceList.phoneList = []
+    state.attendanceList = []
   },
   //添加一个参会人到attendanceList
   [types.ADD_ATTENDANCE_TO_LIST](state, payload) {
-    if (CONTACT_TYPE.iWand === payload.contactType) {
-      state.attendanceList.iWandList.push(payload.attendance)
-    } else if (CONTACT_TYPE.phone === payload.contactType) {
-      state.attendanceList.phoneList.push(payload.attendance)
-    }
+    state.attendanceList.push(payload.attendance)
   },
   //从attendanceList移除一个参会人
   [types.REMOVE_ATTENDANCE_FROM_LIST](state, payload) {
     let arr = []
-    if (CONTACT_TYPE.iWand === payload.contactType) {
-      for (let item of state.attendanceList.iWandList) {
-        if (item.mobilePhone !== payload.attendance.mobilePhone) {
-          arr.push(item)
-        }
+    for (let item of state.attendanceList) {
+      //区分临时联系人与iWand联系人
+      if (item.phoneNum !== payload.attendance.phoneNum || item.imId !== payload.attendance.imId) {
+        arr.push(item)
       }
-      state.attendanceList.iWandList = arr
-    } else if (CONTACT_TYPE.phone === payload.contactType) {
-      for (let item of state.attendanceList.phoneList) {
-        //TODO
-        if (item.userName !== payload.attendance.userName) {
-          arr.push(item)
-        }
-      }
-      state.attendanceList.phoneList = arr
     }
+    state.attendanceList = arr
   },
   [types.SET_IWAND_CONTACT_LIST](state, iWandContactList) {
     state.iWandContactList = iWandContactList

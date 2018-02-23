@@ -174,7 +174,8 @@
       },
       'attendanceList': {
         handler: function () {
-          let len = this.attendanceList.iWandList.length + this.attendanceList.phoneList.length
+//          let len = this.attendanceList.iWandList.length + this.attendanceList.phoneList.length
+          let len = this.attendanceList.length
           if (len > 0) {
             this.hasSelectedAttendance = true
             this.renderHeader.rightValue = '完成(' + len + ')'
@@ -257,6 +258,7 @@
           display: inline-block;
           height: $header-height;
           width: 100%;
+          text-align: center;
         }
         .active {
           color: $main-text-color;

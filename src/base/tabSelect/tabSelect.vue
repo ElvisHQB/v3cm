@@ -41,8 +41,6 @@
 <style scoped lang="scss" type="text/scss">
   $meetingDetail-color: #dd2738;
   $background-color: #fff;
-  $meeting-title-height: 50px;
-  $player-height: 80px;
   .tab-select {
     flex-direction: column;
     .tab-bar {

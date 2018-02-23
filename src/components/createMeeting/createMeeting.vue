@@ -108,7 +108,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { MessageBox } from 'mint-ui'
+  import { MessageBox, Toast } from 'mint-ui'
   import { desktopSharePrompt } from '../../api/prompt'
   import { CLEAR_ATTENDANCE_LIST } from '../../store/mutation-types'
 
@@ -132,7 +132,7 @@
     methods: {
       _switchToggle() {
         if (this.switchValue) {
-          let len = this.attendanceList.phoneList.length + this.attendanceList.iWandList.length
+          let len = this.attendanceList.length
           if (len > maxAttendanceNum) {
             this.$messagebox.alert('目前桌面共享功能，只支持12人以下规模的会议，请知晓!').then(action => {
               this.switchValue = false
@@ -163,20 +163,23 @@
       clickOnSubmit() {
         //提交完成之后，清空vuex中的已选参会人
         this.$store.commit(CLEAR_ATTENDANCE_LIST)
+        Toast({
+          message: '创建私会成功',
+          duration: '1500',
+          position: 'bottom'
+        })
+        this.$router.push({ path: 'newestMeeting' })
       }
     },
     activated() {
       //TODO
-      let len = this.attendanceList.phoneList.length + this.attendanceList.iWandList.length
+      let len = this.attendanceList.length
       if (len === 0) {
         this.attendanceText = '请选择参会人'
       } else {
         this.attendanceText = ''
-        for (let u1 of this.attendanceList.phoneList) {
-          this.attendanceText += u1.name + ','
-        }
-        for (let u2 of this.attendanceList.iWandList) {
-          this.attendanceText += u2.name + ','
+        for (let u of this.attendanceList) {
+          this.attendanceText += u.name + ','
         }
       }
       if (len > maxAttendanceNum) {

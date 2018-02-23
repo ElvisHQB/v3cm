@@ -32,10 +32,7 @@ export default {
   //会议评论列表
   commentList: [],
   //所选参会人
-  attendanceList: {
-    iWandList: [],
-    phoneList: []
-  },
+  attendanceList: [],
   //iWand联系人列表
   iWandContactList: [],
   //手机联系人列表
