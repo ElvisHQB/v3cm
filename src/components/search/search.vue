@@ -35,7 +35,7 @@
   import { searchMeetingUrl } from 'api/config'
   import api from 'api/fetchData'
   import { SET_SEARCH_MEETING_LIST, SET_SEARCH_STR } from '../../store/mutation-types'
-  import { genMeetingListItem } from '../../common/js/utils'
+  import { Meeting } from '../../common/js/utils'
 
   export default {
     name: 'search',
@@ -135,8 +135,7 @@
             }
             let meetingList = []
             for (let meeting of res.list) {
-              let meetingItem = genMeetingListItem(meeting)
-              meetingList.push(meetingItem)
+              meetingList.push(Meeting(meeting))
             }
             this.noMoreData = meetingList.length < pageSize
             if (currentPage === 1) {
@@ -167,6 +166,7 @@
   @import '../../common/scss/variable.scss';
   $search-history-items-color: #f2f2f2;
   $clear-history-button-color: #dd524d;
+  $empty-result-list-color: #ccc;
   $search-history-item-color: rgba(173, 173, 173, 0.44);
   //$search-header-height: 44px;
   //$search-header-color: #dd2738;
@@ -211,7 +211,7 @@
     .search-result {
       .empty-result-list {
         font-size: $font-size-medium-x;
-        color: #ccc;
+        color: $empty-result-list-color;
         display: flex;
         justify-content: center;
         justify-items: center;

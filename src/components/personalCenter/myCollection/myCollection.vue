@@ -19,9 +19,7 @@
               {
                 content: '取消收藏',
                 style: { background: '#dd2637', color: '#fff', fontSize: '14px', padding: '0 30px',display: 'flex', alignItems: 'center' },
-                handler: () => $messagebox.confirm('确认取消此会议？', '提示').then(action => {
-                  _bookMarkMeeting(item.id, true)
-                })
+                handler: () => {_cancelCollection(item.id)}
               }
             ]">
           <list-view :item="item"></list-view>
@@ -48,11 +46,15 @@
   import ListView from '../../../base/listView/listView'
   import {SET_MY_COLLLECTION_LIST} from '../../../store/mutation-types'
   import { closeWebView } from '../../../api/native'
+  import { MessageBox, CellSwipe, Loadmore } from 'mint-ui'
 
   export default {
     name: 'my-collection',
     components: {
-      ScrollList, ListView
+      ScrollList,
+      ListView,
+      'mt-cell-swipe': CellSwipe,
+      'mt-loadmore': Loadmore
     },
     data() {
       return {
@@ -78,6 +80,11 @@
       }
     },
     methods: {
+      _cancelCollection(id) {
+        MessageBox.confirm('确认取消此会议？', '提示').then(action => {
+          this._bookMarkMeeting(id, true)
+        })
+      },
       //取消收藏
       _bookMarkMeeting(meetingId, bookMarked) {
         bookmarkMeeting(meetingId, bookMarked)
@@ -85,6 +92,7 @@
       // 触发下拉刷新事件
       _loadTop() {
         this._getMyCollectionMeeting(1)
+        console.log('aaaaa')
         this.$refs.loadmore.onTopLoaded()
       },
       // 触发上拉加载事件
@@ -94,7 +102,6 @@
         this.$refs.loadmore.onBottomLoaded()
       },
       _getMyCollectionMeeting(currentPage) {
-        if (this.noMore) return
         this.currentPage = currentPage
         const url = getBookMarkedMeetingListUrl
         let params = {
@@ -123,16 +130,16 @@
             let response = e.response.data ? e.response.data : false
             if (response && response.errorMsg) {
               if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
-                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
                   closeWebView(true)
                 })
               } else {
-                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                   closeWebView(true)
                 })
               }
             } else {
-              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+              MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                 closeWebView(true)
               })
             }
@@ -144,14 +151,18 @@
 
 <style scoped lang="scss">
   @import "../../../common/scss/variable";
+  $pull-buttom-height: 40px;
+  $pull-buttom-text-height: 24px;
+  $pull-buttom-text-color: #777;
+  $cell-swipe-margin: 6px;
 
   #myCollectionBody.my-collection-body {
 
     .scroll-list-wrapper {
       .mint-cell-swipe {
-        margin-top: 6px;
+        margin-top: $cell-swipe-margin;
        /deep/ .mint-cell-wrapper {
-          font-size: 12px;
+          font-size: $font-size-small;
          /deep/ .mint-cell-title {
            max-width: 0;
          }
@@ -159,15 +170,15 @@
       }
 
       .pull-bottom-wrapper {
-        height: 40px;
+        height: $pull-buttom-height;
         display: flex;
         justify-content: center;
         align-items: center;
         .pull-bottom {
-          height: 24px;
-          line-height: 24px;
+          height: $pull-buttom-text-height;
+          line-height: $pull-buttom-text-height;
           font-size: $font-size-medium;
-          color: #777;
+          color: $pull-buttom-text-color;
         }
       }
     }

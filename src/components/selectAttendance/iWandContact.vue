@@ -4,11 +4,11 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
-  import ContactList from '../../base/contactList/contactList'
-  import { CONTACT_TYPE, getUserListGroupUrl, getUserAvatarUrl } from '../../api/config'
-  import api from '../../api/fetchData'
+  import ContactList from './contactList/contactList'
+  import { CONTACT_TYPE, getUserListGroupUrl, getUserAvatarUrl } from 'api/config'
+  import api from 'api/fetchData'
   import { SET_IWAND_CONTACT_LIST } from '../../store/mutation-types'
-  import { genIWandContactList } from '../../common/js/utils'
+  import { genIWandContactList } from 'common/js/utils'
 
   export default {
     components: {

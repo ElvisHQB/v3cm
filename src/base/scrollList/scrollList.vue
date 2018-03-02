@@ -29,11 +29,13 @@
 
 <script type="text/ecmascript-6">
   import ListView from '../../base/listView/listView'
+  import { Loadmore } from 'mint-ui'
 
   export default {
     name: 'scrollList',
     components: {
-      ListView
+      ListView,
+      'mt-loadmore': Loadmore
     },
     props: {
       // list数据数组

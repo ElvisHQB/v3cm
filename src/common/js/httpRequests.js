@@ -1,10 +1,10 @@
 // 取消收藏
 import api from '../../api/fetchData'
 import {bookMarkMeeting, isCrmRestrictedForMeeting, getRecordUrl, getDocumentUrl, HOST, addUserLogOfPlayFailed, getMeetingPlaybackUrl} from '../../api/config'
-import {BOOK_MARK_MY_COLLOCTION, SET_CURRENT_PLAY_MEETINGID, SET_PERSONAL_CENTER_COUNT} from '../../store/mutation-types'
+import {BOOK_MARK_MY_COLLOCTION, SET_CURRENT_PLAY_MEETING, SET_PERSONAL_CENTER_COUNT, SET_RESTRICTED_MEETING_LIST} from '../../store/mutation-types'
 import ERR_CODE from '../../api/errorCode'
 import store from '../../store'
-import {Toast} from 'mint-ui'
+import {Toast, MessageBox} from 'mint-ui'
 import { addDownloadItem, pdfReader, playMedia, registerMediaPlayerErrorCode, stopMedia, openWebView } from '../../api/native'
 import { getLatestPlayArray, addToLatestPlay } from './utils'
 
@@ -45,6 +45,34 @@ const mediaPlayErrorCallback = {
     'MEDIA_ERROR_InsufficientPriority': 561017449,
     'MEDIA_ERROR_CodeResourceNotAvailable': 561145203,
     'MEDIA_ERROR_CodeUnspecified': 2003329396
+  },
+  'instruction': {
+    'MEDIA_ERROR_UNKNOWN': '未知播放错误',
+      'MEDIA_ERROR_SERVER_DIED': '媒体服务器未响应',
+      'MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK': '播放器不支持该音频流连续播放',
+      'MEDIA_ERROR_IO': '音频流文件错误',
+      'MEDIA_ERROR_MALFORMED': '音频流不符合相关的编码标准或文件规范',
+      'MEDIA_ERROR_UNSUPPORTED': '播放器不支持该音频流的相关编码标准或规范',
+      'MEDIA_ERROR_TIMED_OUT': '播放器长时间未响应',
+      'MEDIA_ERROR_FILE_NOUPDATE': '播放器超过8秒未读取到数据',
+      'MEDIA_ERROR_PLAY_ABNORMAL': '播放器未知异常',
+      'MEDIA_ERROR_NETWORK_UNREACHABLE': '移动设备网络不可用',
+      'MEDIA_ERROR_FILE_ERROR': '播放器读取音频文件错误或文件已经损坏',
+      'MEDIA_ERROR_FILE_NOTEXIST': '对应的音频文件URL地址为空',
+      'MEDIA_ERROR_DOWNLOAD_HTML_FAIL': '下载音频文件出现错误',
+      'MEDIA_ERROR_PARSEHTML_FAIL': '解析音频下载地址的HTML失败',
+      'MEDIA_ERROR_CodeMediaServicesFailed': '媒体服务器未响应',
+      'MEDIA_ERROR_CodeIsBusy': '媒体服务器忙',
+      'MEDIA_ERROR_CodeIncompatibleCategory': '播放器不支持该音频流的相关编码标准或规范',
+      'MEDIA_ERROR_CodeCannotInterruptOthers': '已经存在其他播放器正在播放,不能覆盖其他播放器',
+      'MEDIA_ERROR_CodeMissingEntitlement': '播放器缺少授权，未能启动',
+      'MEDIA_ERROR_CodeSiriIsRecording': 'siri正在录音，不能启动播放器',
+      'MEDIA_ERROR_CodeCannotStartPlaying': '播放器不能开始播放',
+      'MEDIA_ERROR_CodeCannotStartRecording': '播放器不能开始录音',
+      'MEDIA_ERROR_CodeBadParam': '音频文件编码错误',
+      'MEDIA_ERROR_InsufficientPriority': '播放器优先级不足',
+      'MEDIA_ERROR_CodeResourceNotAvailable': '对应的音频文件URL地址为空',
+      'MEDIA_ERROR_CodeUnspecified': '未指明的音频文件'
   }
 }
 
@@ -80,23 +108,44 @@ export const bookmarkMeeting = (meetingId, bookmarked) => {
 //行业鉴权
 export const detailAuthentication = (id, isRestricted, self) => {
   if (isRestricted === 'restricted') {
-    let url = isCrmRestrictedForMeeting
-    let params = {
-      meetingId: id
-    }
-    return api.getData(url, 'get', {params: params})
-      .then((res) => {
-        if (res === 'INDUSTRY_RESTRICTED') {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
-        } else if (res === 'WHITE_LIST_RESTRICTED') {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
-        } else if (res === 'NON_RESTRICTED') {
+    let restrictedMeetingList = store.getters.restrictedMeetingList
+    let isExist = false
+    for (let meeting of restrictedMeetingList) {
+      if (meeting.meetingId === id) {
+        if (meeting.restrictedMsg === 'NON_RESTRICTED') {
+          isExist = true
           self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+          break
+        } else {
+          MessageBox.alert(meeting.restrictedMsg)
+          isExist = true
+          break
         }
-        // TODO mutation state
-      }).catch((e) => {
-        console.log(e)
-      })
+      }
+    }
+    if (!isExist) {
+      let restrictedMeeting = {}
+      restrictedMeeting.meetingId = id
+      let url = isCrmRestrictedForMeeting
+      let params = {
+        meetingId: id
+      }
+      return api.getData(url, 'get', {params: params})
+        .then((res) => {
+          restrictedMeeting.restrictedMsg = res
+          store.commit(SET_RESTRICTED_MEETING_LIST, restrictedMeeting)
+          if (res === 'INDUSTRY_RESTRICTED') {
+            MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
+          } else if (res === 'WHITE_LIST_RESTRICTED') {
+            MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
+          } else if (res === 'NON_RESTRICTED') {
+            self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+          }
+          // TODO mutation state
+        }).catch((e) => {
+          console.log(e)
+        })
+    }
   } else {
     self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
   }
@@ -123,11 +172,11 @@ export const getAudioUrl = (id, audioId, title, isDownLoad, self, item) => {
           playMedia(title, audioUrl, self.$store.getters.serverInfo + detailPageUrl, playMediaType.float)
           //播放错误回调
           registerMediaPlayerErrorCode(registerMediaPlayerErrorCodeCallBack.name)
-          store.commit(SET_CURRENT_PLAY_MEETINGID, id)
+          store.commit(SET_CURRENT_PLAY_MEETING, item)
           //添加到最近播放
           let latestPlayArray = getLatestPlayArray()
           addToLatestPlay(latestPlayArray, item)
-          store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'latestPlay', num: getLatestPlayArray().length + 1})
+          store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'latestPlay', num: getLatestPlayArray().length})
         }
       }
     })
@@ -136,9 +185,9 @@ export const getAudioUrl = (id, audioId, title, isDownLoad, self, item) => {
       let response = e.response.data ? e.response.data : false
       if (response && response.errorMsg) {
         if (response.errorCode === ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.CODE) {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
+          MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
         } else if (response.errorCode === ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.CODE) {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
+          MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
         }
       } else {
         Toast({
@@ -154,28 +203,39 @@ export const getAudioUrl = (id, audioId, title, isDownLoad, self, item) => {
 export const registerMediaPlayerErrorCodeCallBack = (content) => {
   console.log('errorCodeCallBack content =' + content)
   let errorCodeCallBack = JSON.parse(content)
+  let playErrContent = {}
   for (let deviceType in mediaPlayErrorCallback) {
     if (deviceType === errorCodeCallBack.deviceType) {
       for (let errorCode in mediaPlayErrorCallback[deviceType]) {
         if (mediaPlayErrorCallback[deviceType][errorCode] === errorCodeCallBack.errorCode) {
-          errorCodeCallBack.errorCode = errorCode
+          playErrContent.userErrorMessage = errorCode
+          playErrContent.userErrorInstruction = mediaPlayErrorCallback.instruction[errorCode]
+          break
+        } else {
+          playErrContent.userErrorMessage = 'MEDIA_ERROR_UNKNOWN'
+          playErrContent.userErrorInstruction = mediaPlayErrorCallback.instruction.MEDIA_ERROR_UNKNOWN
         }
       }
     }
   }
-  let meetingId = store.getters.currentPlayMeetingId
-  let errorCode = errorCodeCallBack.errorCode
-  addMediaPlayErrorToLog(meetingId, errorCode)
+  let currentPlayMeeting = store.getters.currentPlayMeeting
+  playErrContent.meetingId = currentPlayMeeting.id
+  playErrContent.userErrorType = currentPlayMeeting.meetingStatus === 'STARTED' ? 'PLAY_LIVE_AUDIO' : 'PLAY_HISTORY_AUDIO'
+  playErrContent.userDeviceType = errorCodeCallBack.deviceType === 'iOS' ? 'IOS' : 'ANDROID'
+  playErrContent.userErrorCode = errorCodeCallBack.errorCode
+  addMediaPlayErrorToLog(playErrContent)
 }
 
 // 播放错误回调UserLog
-export const addMediaPlayErrorToLog = (meetingId, errorCode) => {
+export const addMediaPlayErrorToLog = (playErrContent) => {
   let log = {
-    meetingId: meetingId,
-    actionCode: 'PLAY_MEDIA_ERROR',
-    actionContent: errorCode,
-    actionTime: new Date().format('yyyy-MM-dd HH:mm'),
-    actionDevice: navigator.userAgent || ''
+    meetingId: playErrContent.meetingId,
+    userDeviceType: playErrContent.userDeviceType,
+    userDeviceInfo: navigator.userAgent || '',
+    userErrorType: playErrContent.userErrorType,
+    userErrorCode: playErrContent.userErrorCode,
+    userErrorMessage: playErrContent.userErrorMessage,
+    userErrorInstruction: playErrContent.userErrorInstruction
   }
   let url = addUserLogOfPlayFailed
   return api.getData(url, 'post', JSON.stringify(log))
@@ -209,9 +269,9 @@ export const getDocument = (id, pdfId, title, self) => {
       let response = e.response.data ? e.response.data : false
       if (response && response.errorMsg) {
         if (response.errorCode === ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.CODE) {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
+          MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
         } else if (response.errorCode === ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.CODE) {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
+          MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
         }
       } else {
         Toast({
@@ -224,7 +284,7 @@ export const getDocument = (id, pdfId, title, self) => {
 }
 
 //获取视频回放
-export const getMeetingPlayback = (item, self) => {
+export const getMeetingPlayback = (item) => {
   const url = getMeetingPlaybackUrl
   let params = {
     meetingId: item.id
@@ -256,9 +316,9 @@ export const getMeetingPlayback = (item, self) => {
       let response = e.response.data ? e.response.data : false
       if (response && response.errorMsg) {
         if (response.errorCode === ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.CODE) {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
+          MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
         } else if (response.errorCode === ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.CODE) {
-          self.$messagebox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
+          MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
         }
       } else {
         Toast({

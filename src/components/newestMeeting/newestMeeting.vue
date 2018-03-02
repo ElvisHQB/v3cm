@@ -8,27 +8,42 @@
         <img :src="img.url" class="swipe-img">
       </mt-swipe-item>
     </mt-swipe>
-    <!--最新会议列表-->
-    <scroll-list :listData="newestMeeting" :noMore="noMoreData"
-                 @loadTop="_getNewestMeeting(firstPage, pageSize)"
-                 @loadBottom="_getNewestMeeting(currentPage + 1, pageSize)">
-    </scroll-list>
+    <!--TODO 最新会议列表-->
+    <!--<scroll-list :listData="newestMeeting" :noMore="noMoreData"-->
+                 <!--@loadTop="_getNewestMeeting(firstPage, pageSize)"-->
+                 <!--@loadBottom="_getNewestMeeting(currentPage + 1, pageSize)">-->
+    <!--</scroll-list>-->
+    <scroll :data="newestMeeting" :pullDownRefresh="true" :pullUpLoad="true"
+            @pullingDown="_getNewestMeeting(firstPage, pageSize)"
+            @pullingUp="_getNewestMeeting(currentPage + 1, pageSize)"
+            class="scroll">
+      <div>
+        <list-view :item="item" v-for="(item, index) in newestMeeting" :key="index"></list-view>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import { Swipe, SwipeItem, MessageBox } from 'mint-ui'
   import { getLatestMeetingUrl } from 'api/config'
   import api from 'api/fetchData'
-  import ERR_CODE from '../../api/errorCode'
-  import ScrollList from '../../base/scrollList/scrollList'
-  import { genMeetingListItem } from '../../common/js/utils'
+  import ERR_CODE from 'api/errorCode'
+//  import ScrollList from 'base/scrollList/scrollList'
+  import { Meeting } from 'common/js/utils'
   import { SET_NEWEST_MEETING_LIST } from '../../store/mutation-types'
-  import { closeWebView } from '../../api/native'
+  import { closeWebView } from 'api/native'
+  import Scroll from 'base/scroll/scroll'
+  import ListView from 'base/listview/listView'
 
   export default {
     name: 'newestMeeting',
     components: {
-      ScrollList
+//      ScrollList,
+      Scroll,
+      ListView,
+      'mt-swipe': Swipe,
+      'mt-swipe-item': SwipeItem
     },
     data() {
       return {
@@ -75,7 +90,7 @@
           .then((res) => {
             let meetingList = []
             for (let meeting of res.list) {
-              meetingList.push(genMeetingListItem(meeting))
+              meetingList.push(new Meeting(meeting))
             }
             // 没有更多数据
             this.noMoreData = meetingList.length < pageSize
@@ -90,16 +105,16 @@
           let response = e.response.data ? e.response.data : false
           if (response && response.errorMsg) {
             if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
-              this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+              MessageBox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
                 closeWebView(true)
               })
             } else {
-              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+              MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                 closeWebView(true)
               })
             }
           } else {
-            this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+            MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
               closeWebView(true)
             })
           }
@@ -119,6 +134,9 @@
       .swipe-img {
         width: 100%;
       }
+    }
+    .scroll {
+      height: 550px;
     }
   }
 </style>

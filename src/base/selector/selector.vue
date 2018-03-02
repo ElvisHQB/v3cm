@@ -84,25 +84,33 @@
 
 <style scoped lang='scss'>
   @import "../../common/scss/variable";
+  $selector-font-size: 15px;
+  $selector-tab-height: 38px;
+  $selector-background: #ffffff;
+  $selector-active: #007aff;
+  $selector-shadow-color: rgba(0, 0, 0, 0.47);
+  $selector-list-button-height: 28px;
+  $selector-list-button-border-radius: 5px;
+  $selector-list-button-border-color: #d3d3d3;
 
   .selector {
     color: black;
     font-family: $font-family;
-    font-size: 15px;
+    font-size: $selector-font-size;
 
     .selector-tab {
       text-align: center;
-      height: 38px;
-      line-height: 38px;
+      height: $selector-tab-height;
+      line-height: $selector-tab-height;
       display: flex;
-      background-color: white;
+      background-color: $selector-background;
       position: relative;
 
       .selector-tab-item {
         flex: 1;
 
         .selector-span-active {
-          color: #007aff;
+          color: $selector-active;
         }
 
         .selector-span i {
@@ -111,7 +119,7 @@
       }
 
       .selector-tab-item-active {
-        border-bottom: 2px solid #007aff;
+        border-bottom: 2px solid $selector-active;
       }
     }
 
@@ -125,21 +133,21 @@
     .selector-list-wrap {
 
       .selector-list {
-        background-color: white;
+        background-color: $selector-background;
         width: 100%;
 
         .selector-list-button {
-          height: 28px;
+          height: $selector-list-button-height;
           padding: 0 8px;
           margin: 7px 5px;
-          background-color: white;
-          border: 1px solid lightgray;
-          border-radius: 5px;
+          background-color: $selector-background;
+          border: 1px solid $selector-list-button-border-color;
+          border-radius: $selector-list-button-border-radius;
         }
       }
 
       .selector-shadow {
-        background-color: rgba(0, 0, 0, 0.47);
+        background-color: $selector-shadow-color;
         z-index: 99;
         opacity: 0.4;
       }

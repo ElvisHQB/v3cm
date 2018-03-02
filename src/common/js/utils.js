@@ -205,12 +205,7 @@ const hour = 60 * minute // 1小时
 const day = 24 * hour // 1天
 const month = 31 * day // 1月
 const year = 12 * month // 1年
-/**
- * 返回文字描述的日期
- *
- * @param date
- * @return
- */
+// 返回文字描述的日期
 export const getTimeFormatText = (date) => {
   if (date == null) {
     return null
@@ -348,60 +343,43 @@ export const addToLatestPlay = (latestPlayArray, item) => {
 }
 
 // 会议详情对象
-export const genMeetingDetailItem = (item) => {
-  let detail = {}
-  //会议编号
-  detail.id = item.id
-  //会议标题
-  detail.title = item.title ? item.title : defaultTitle
-  //会议广播类型
-  detail.broadcastType = item.broadcastType ? item.broadcastType : defaultType
-  //会议简介
-  detail.description = item.description
-  //会议议程
-  detail.agenda = item.agenda
-  //会议时间
-  detail.meetingTime = genMeetingTime(item.startTime, item.endTime)
-  //会议主讲人
-  detail.lecturers = []
-  if (item.lecturers.length < 1) detail.lecturers.push(defaultLecture)
-  for (let lecture of item.lecturers) {
-    let lctr = {}
-    lctr.name = lecture.name
-    lctr.intro = lecture.name + (lecture.title ? '(' + lecture.title + ')' : '')
-    lctr.description = lecture.description
-    detail.lecturers.push(lctr)
+export class MeetingDetail {
+  constructor (item) {
+    this.id = item.id
+    this.title = item.title ? item.title : defaultTitle
+    this.broadcastType = item.broadcastType ? item.broadcastType : defaultType
+    this.description = item.description
+    this.agenda = item.agenda
+    this.meetingTime = genMeetingTime(item.startTime, item.endTime)
+    this.lecturers = []
+    for (let lecture of item.lecturers) {
+      this.lecturers.push({
+        name: lecture.name,
+        intro: lecture.name + (lecture.title ? '(' + lecture.title + ')' : ''),
+        description: lecture.description
+      })
+    }
+    if (this.lecturers.length < 1) this.lecturers.push({ name: '', intro: defaultLecture, description: '' })
+    this.sponsors = []
+    for (let sponsor of item.sponsors) {
+      this.sponsors.push({ name: sponsor.name })
+    }
+    if (this.sponsors.length < 1) this.sponsors.push({ name: defaultSponsor })
+    this.meetingStatus = item.meetingStatus
+    this.bookmarkStatus = item.bookmarkStatus
+    this.signupStatus = item.signupStatus
+    this.audioId = item.audioId
+    this.meetingRoom = item.meetingRoom
+    //附件和速记？ attachments,pdfId, pptId, audioId
   }
-  //会议主办方
-  detail.sponsors = []
-  if (item.sponsors.length < 1) detail.sponsors.push(defaultSponsor)
-  for (let sponsor of item.sponsors) {
-    let spnsr = {}
-    spnsr.name = sponsor.name
-    detail.sponsors.push(spnsr)
-  }
-  //会议状态
-  detail.meetingStatus = item.meetingStatus
-  //收藏状态
-  detail.bookmarkStatus = item.bookmarkStatus
-  //报名状态
-  detail.signupStatus = item.signupStatus
-  //音频编号
-  detail.audioId = item.audioId
-  //会议室及播放地址
-  detail.meetingRoom = item.meetingRoom
-  //附件和速记？ attachments,pdfId, pptId, audioId
-
-  return detail
 }
 
 //评论对象
 export const genCommentItem = item => {
   let comment = {}
-  //运营crmId
-  const adminList = [1226872, 1403545, 1211961, 2670541, 2506835, 1226861]
+  const adminList = [1226872, 1403545, 1211961, 2670541, 2506835, 1226861] //运营crmId
   comment.authorName = adminList.includes(item.author.crmId) ? '3C小秘书' : item.author.name
-  comment.commentTime = getTimeFormatText(new Date(item.commentTime))
+  comment.commentTime = item.commentTime ? getTimeFormatText(new Date(item.commentTime)) : ''
   comment.content = item.content
 
   return comment
@@ -470,15 +448,10 @@ export const genIWandContactList = (userListGroup, userAvatarList) => {
     let arr = []
     for (let user of users.userList) {
       let u = {}
-      //姓名
       u.name = user.userName
-      //手机号
       u.phoneNum = user.mobilePhone
-      //imId
       u.imId = user.iMID
-      //公司
       u.company = user.company
-      //头像
       u.avatar = userAvatarList[index++].iconData
       arr.push(u)
     }

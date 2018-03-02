@@ -503,5 +503,6 @@ export const closeWebView = (back) => {
     }
     top.wdobject.shell_Req(JSON.stringify(params))
   } else if (back) {
+    history.go(-1)
   }
 }

@@ -21,6 +21,14 @@
         type: Boolean,
         default: false
       },
+      pullDownRefresh: {
+        type: Boolean,
+        default: false
+      },
+      pullUpload: {
+        type: Boolean,
+        default: false
+      },
       data: {
         type: Array,
         default: function () {
@@ -28,10 +36,17 @@
         }
       }
     },
+    data() {
+      return {
+        isPullingDown: false,
+        isPullUpLoad: false
+      }
+    },
     mounted() {
       setTimeout(() => {
         this._initScroll()
       }, 20)
+//      this.$nextTick(this._initScroll())
     },
     methods: {
       _initScroll() {
@@ -41,9 +56,24 @@
         this.scroll = new BScroll(this.$refs.wrapper, {
           probeType: this.probeType,
           click: this.click,
-          bounce: this.bounce
+          bounce: this.bounce,
+//          pullDownRefresh: this.pullDownRefresh,
+//          pullUpload: this.pullUpload
+          pullDownRefresh: {
+            threshold: 50,
+            stop: 20
+          },
+          pullUpLoad: {
+            threshold: 50
+          }
         })
-//        console.log(this.scroll)
+        console.log(this.scroll)
+        if (this.pullDownRefresh) {
+          this._initPullDownRefresh()
+        }
+        if (this.pullUpLoad) {
+          this._initPullUpload()
+        }
       },
       enable() {
         this.scroll && this.scroll.enable()
@@ -59,6 +89,16 @@
       },
       scrollToElement() {
         this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
+      },
+      _initPullDownRefresh() {
+        this.scroll.on('pullingDown', () => {
+          this.$emit('pullingDown')
+        })
+      },
+      _initPullUpload() {
+        this.scroll.on('pullingUp', () => {
+          this.$emit('pullingUp')
+        })
       }
     },
     watch: {
@@ -66,6 +106,7 @@
         setTimeout(() => {
           this.refresh()
         }, 20)
+//        this.$nextTick(this.refresh())
       }
     }
   }

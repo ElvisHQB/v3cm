@@ -34,13 +34,14 @@
 
 <script type="text/ecmascript-6">
   import selector from '../../base/selector/selector'
-  import meetingInfoList from '../../base/meetingInfoList/meetingInfoList'
+  import meetingInfoList from './meetingInfoList'
   import {genMeetingInfoListItem} from '../../common/js/utils'
   import {getOfflineMeetingListUrl} from '../../api/config'
   import api from '../../api/fetchData'
   import ERR_CODE from '../../api/errorCode'
-  import { closeWebView } from '../../api/native'
-  import { SET_MEETINGINFO_LIST } from '../../store/mutation-types'
+  import {closeWebView} from '../../api/native'
+  import {SET_MEETINGINFO_LIST} from '../../store/mutation-types'
+  import {MessageBox, Loadmore} from 'mint-ui'
 
   const meetingInfoCategory = ['类型', '地点', '时间']
   const meetingInfoDetail = [['全部', '宏观经济', '高峰论坛', '行业会议', '业绩发布会', '学术会议', '其他会议'],
@@ -53,7 +54,9 @@
   export default {
     name: 'meetingInfo',
     components: {
-      selector, meetingInfoList
+      selector,
+      meetingInfoList,
+      'mt-loadmore': Loadmore
     },
     mounted() {
       let startTime = new Date()
@@ -179,16 +182,16 @@
             let response = e.response.data ? e.response.data : false
             if (response && response.errorMsg) {
               if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
-                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
                   closeWebView(true)
                 })
               } else {
-                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                   closeWebView(true)
                 })
               }
             } else {
-              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+              MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                 closeWebView(true)
               })
             }
@@ -209,9 +212,13 @@
 
 <style scoped lang="scss">
   @import "../../common/scss/variable";
+  $selector-border-width: 2px;
+  $selector-border-color: #efeff4;
+  $pull-buttom-height: 40px;
+  $pull-buttom-text-height: 24px;
+  $pull-buttom-text-color: #777;
 
   .meetingInfo-body {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     padding-top: 40px;
@@ -221,19 +228,19 @@
       width: 100%;
       top: 44px;
       z-index: 99;
-      border-bottom: 2px solid #efeff4;
+      border-bottom: $selector-border-width solid $selector-border-color;
     }
 
     .pull-bottom-wrapper {
-      height: 40px;
+      height: $pull-buttom-height;
       display: flex;
       justify-content: center;
       align-items: center;
       .pull-bottom {
-        height: 24px;
-        line-height: 24px;
+        height: $pull-buttom-text-height;
+        line-height: $pull-buttom-text-height;
         font-size: $font-size-medium;
-        color: #777;
+        color: $pull-buttom-text-color;
       }
     }
   }

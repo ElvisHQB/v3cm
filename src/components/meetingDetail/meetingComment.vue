@@ -18,19 +18,14 @@
           <div class="popup-title">
             <p class="">评论</p>
           </div>
-          <div class="popup-content">
-            <!--<div class="popup-textarea" contenteditable="true" placeholder="请输入评论，不超过140字"></div>-->
-            <!--innerText & textContent-->
-            <div v-on:input="_onInputChange($event.target.textContent)" contenteditable="true" class="popup-textarea"></div>
-            <div v-bind:class="[{ 'count-exceed': countExceed }, 'comment-counter']">
-              <span class="">{{ currentCount }}</span>
-              <span>/</span>
-              <span>{{ maxCount }}</span>
-            </div>
-            <!--<div class="comment-text-field"></div>-->
-          </div>
+          <analog-textarea :maxCount="140" :message="'评论最多140字'"
+                           :placeholderText="'请输入评论，不超过140字'"
+                           :class="'comment-textarea'"
+                           :clearContent="clearContent"
+                           @contentChange="_handleContentChange">
+          </analog-textarea>
           <div class="popup-bottom">
-            <span v-bind:class="[{ 'button-invalid': countExceed }, 'send-comment-btn']" @click="_sendComment">发表评论</span>
+            <span v-bind:class="[{ 'button-invalid': commentBtnInvalid }, 'send-comment-btn']" @click="_sendComment">发表评论</span>
           </div>
         </div>
       </mt-popup>
@@ -42,18 +37,23 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { commentMeetingUrl } from '../../api/config'
-  import { Toast } from 'mint-ui'
+  import { commentMeetingUrl } from 'api/config'
   import api from 'api/fetchData'
+  import AnalogTextarea from 'base/analogTextarea/analogTextarea'
+  import { Popup } from 'mint-ui'
+
   export default {
     name: 'meetingComment',
+    components: {
+      AnalogTextarea,
+      'mt-popup': Popup
+    },
     data() {
       return {
-        'commentPopup': false,
-        'commentContent': '这是一条测试专用评论',
-        'currentCount': 0,
-        'maxCount': 140,
-        'countExceed': false
+        commentPopup: false,
+        commentContent: '',
+        commentBtnInvalid: true,
+        clearContent: false
       }
     },
     computed: {
@@ -65,24 +65,12 @@
       }
     },
     methods: {
-      _onInputChange(content) {
-        this.commentContent = content
-        this.currentCount = content.length
-        this.countExceed = this.currentCount > this.maxCount
-        if (this.countExceed) {
-          Toast({
-            message: '评论最多140字',
-            position: 'middle',
-            duration: 3000
-          })
-        }
-      },
       _togglePopUp() {
         this.commentPopup = true
       },
       _sendComment() {
         // 字数超过，按钮无效
-        if (this.countExceed) return
+        if (this.commentBtnInvalid) return
         this.commentPopup = false
         const url = commentMeetingUrl
         let params = {
@@ -101,10 +89,20 @@
           .then((res) => {
             console.log(res)
             this.$emit('commentComplete')
+            this.commentContent = ''
           })
           .catch((e) => {
             console.log(e)
           })
+      },
+      _handleContentChange(content) {
+        this.commentContent = content
+      }
+    },
+    watch: {
+      'commentContent': function () {
+        this.commentBtnInvalid = !(this.commentContent.length > 0 && this.commentContent.length <= 140)
+        this.clearContent = this.commentContent.length === 0
       }
     }
   }
@@ -161,8 +159,6 @@
         width: 375px;
         background-color: $background-color;
         font-size: 14px;
-        /*display: flex;*/
-        /*flex-direction: column;*/
         .popup-title {
           text-align: center;
           height: 20px;
@@ -170,40 +166,22 @@
           color: #dd524d;
           padding: 5px 0;
         }
-        .popup-content {
-          margin: 0 10px;
+        .comment-textarea {
+          padding: 10px 10px 0px 10px;
           border-radius: 4px;
+          margin: 0 15px;
+          font-size: 14px;
           background-color: #eee;
-          .popup-textarea {
-            outline: none;
-            border: none;
-            padding: 10px 15px;
-            font-size: 14px;
-            color: #8f8f94;
-            /*TODO*/
-            min-height: 60px;
-            max-height: 100px;
-            overflow: scroll;
-          }
-          .comment-counter {
-            text-align: right;
-            padding-right: 5px;
-            height: 20px;
-            line-height: 20px;
-          }
-          .count-exceed {
-            color: #dd524d;
-          }
-          /*TODO*/
-          /*.popup-textarea:empty::before {*/
-            /*color: lightgray;*/
-            /*content: attr(placeholder);*/
-          /*}*/
+          color: #8f8f94;
+          min-height: 60px;
+          max-height: 100px;
+          overflow: scroll;
         }
         .popup-bottom {
           height: 40px;
           .send-comment-btn {
             background-color: #dd524d;
+            border-radius: 2px;
             color: #fff;
             padding: 5px 10px;
             margin-top: 6px;

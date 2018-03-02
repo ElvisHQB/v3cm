@@ -11,8 +11,9 @@
   import {genMeetingListItem} from '../../../common/js/utils'
   import api from '../../../api/fetchData'
   import ERR_CODE from '../../../api/errorCode'
-  import { SET_PUBLISHED_MEETING_LIST } from '../../../store/mutation-types'
-  import { closeWebView } from '../../../api/native'
+  import {SET_PUBLISHED_MEETING_LIST} from '../../../store/mutation-types'
+  import {closeWebView} from '../../../api/native'
+  import {MessageBox} from 'mint-ui'
 
   export default {
     name: 'published-meeting',
@@ -71,16 +72,16 @@
             let response = e.response.data ? e.response.data : false
             if (response && response.errorMsg) {
               if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
-                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
                   closeWebView(true)
                 })
               } else {
-                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                   closeWebView(true)
                 })
               }
             } else {
-              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+              MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                 closeWebView(true)
               })
             }

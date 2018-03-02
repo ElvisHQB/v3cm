@@ -49,7 +49,6 @@
     data() {
       return {
         renderHeader: {
-//          'left': 0,
           // 0:none;1:search;2:title
           'center': 1,
           // 0:none;1:create-meeting-btn;2:search-meeting-btn;3:more-info
@@ -174,7 +173,6 @@
       },
       'attendanceList': {
         handler: function () {
-//          let len = this.attendanceList.iWandList.length + this.attendanceList.phoneList.length
           let len = this.attendanceList.length
           if (len > 0) {
             this.hasSelectedAttendance = true
@@ -193,9 +191,10 @@
 <style scoped lang="scss" type="text/scss">
   @import "../../common/scss/variable";
   $header-height: 45px;
+  $input-height: 30px;
   $touch-icon-width: 45px;
   $main-text-color: #fff;
-  //$dd:rgba(0,0,0,.1);
+  $input-background-color: rgba(0,0,0,.1);
   .common-header {
     display: flex;
     flex-direction: row;
@@ -205,9 +204,6 @@
     background-color: $color-theme;
     .header-left {
       flex: 1.5;
-      .icon-back-btn {
-        //
-      }
     }
     .header-center {
       flex: 7;
@@ -216,44 +212,41 @@
       justify-items: center;
       .search {
         width: 100%;
+        form {
+          height: $header-height;
+        }
         input {
           display: inline-block;
           width: 100%;
-          height: 30px;
-          line-height: 30px;
+          margin: 7.5px 0;
+          height: $input-height;
+          line-height: $input-height;
           border-radius: 4px;
           text-indent: 10px;
           outline: none;
           color: $main-text-color;
-          font-size: 16px;
-          background-color: rgba(0,0,0,.1);
-          /*-webkit-appearance: none;*/
+          font-size: $font-size-medium-x;
+          background-color: $input-background-color;
         }
         input[type="search"]::-webkit-search-cancel-button {
           display: none;
         }
       }
       .title {
-        font-size: 17px;
+        font-size: $font-size-medium-x;
         color: $main-text-color;
       }
     }
     .header-right {
       flex: 1.5;
       display: inline-block;
-      height: 45px;
-      line-height: 45px;
-      .search-meeting-btn {
-        //
-      }
-      .create-meeting-btn {
-        //
-      }
+      height: $header-height;
+      line-height: $header-height;
       .more-info {
         color: $main-text-color;
       }
       .select-attendance-complete {
-        font-size: 14px;
+        font-size: $font-size-medium;
         .complete-btn {
           display: inline-block;
           height: $header-height;
@@ -267,7 +260,6 @@
     }
     .icon-select {
       display: inline-block;
-      //width: $touch-icon-width;
       width: 100%;
       height: $header-height;
       line-height: $header-height;

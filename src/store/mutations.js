@@ -86,9 +86,9 @@ const mutations = {
   [types.SET_SERVERINFO](state, serverInfo) {
     state.serverInfo = serverInfo
   },
-  //设置当前播放会议Id
-  [types.SET_CURRENT_PLAY_MEETINGID](state, meetingId) {
-    state.currentPlayMeetingId = meetingId
+  //设置当前播放会议
+  [types.SET_CURRENT_PLAY_MEETING](state, item) {
+    state.currentPlayMeeting = item
   },
   //设置个人中心个数
   [types.SET_PERSONAL_CENTER_COUNT](state, personalNum) {
@@ -109,6 +109,14 @@ const mutations = {
         state.personalCenterNum.downloadCount = personalNum.num
         break
     }
+  },
+  //设置限制会议
+  [types.SET_RESTRICTED_MEETING_LIST](state, item) {
+    state.restrictedMeetingList.push(item)
+  },
+  //设置session
+  [types.SET_SESSIONID](state, sessionid) {
+    state.sessionid = sessionid
   }
 }
 

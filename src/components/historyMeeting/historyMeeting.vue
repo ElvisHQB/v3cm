@@ -19,6 +19,7 @@
   import ERR_CODE from '../../api/errorCode'
   import {SET_HISTORY_MEETING_LIST} from '../../store/mutation-types'
   import { closeWebView } from '../../api/native'
+  import { MessageBox } from 'mint-ui'
 
   const hisCategory = ['类型', '领域']
   const hisDetail = [['全部', 'IR路演', '分析师路演', '产品项目路演', '论坛峰会', '金融培训', '策略会', '其他'], ['全部', '宏观经济', '策略研究', '固定收益', '非银金融', '房地产', '文化传播', '计算机', '医药生物', '通讯电子',
@@ -103,16 +104,16 @@
             let response = e.response.data ? e.response.data : false
             if (response && response.errorMsg) {
               if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
-                this.$messagebox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
                   closeWebView(true)
                 })
               } else {
-                this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                   closeWebView(true)
                 })
               }
             } else {
-              this.$messagebox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+              MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
                 closeWebView(true)
               })
             }
@@ -132,9 +133,10 @@
 </script>
 
 <style scoped lang="scss">
+  $selector-border-width: 2px;
+  $selector-border-color: #efeff4;
 
   .history-meeting-body {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     padding-top: 40px;
@@ -144,8 +146,7 @@
       width: 100%;
       top: 44px;
       z-index: 99;
-      border-bottom: 2px solid #efeff4;
+      border-bottom: $selector-border-width solid $selector-border-color;
     }
-
   }
 </style>

@@ -16,5 +16,7 @@ export const phoneContactList = state => state.phoneContactList
 export const meetingInfoList = state => state.meetingInfoList
 export const privateMeetingList = state => state.privateMeetingList
 export const serverInfo = state => state.serverInfo
-export const currentPlayMeetingId = state => state.currentPlayMeetingId
+export const currentPlayMeeting = state => state.currentPlayMeeting
 export const personalCenterCount = state => state.personalCenterNum
+export const restrictedMeetingList = state => state.restrictedMeetingList
+export const sessionid = state => state.sessionid

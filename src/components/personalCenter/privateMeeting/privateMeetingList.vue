@@ -21,19 +21,21 @@
 </script>
 
 <style scoped lang="scss">
-  @import "../../common/scss/variable";
+  @import "../../../common/scss/variable";
+  $pri-font-size: 21px;
+  $pri-font-color: #000000;
 
   .pri-meeting-list {
     margin-top: 6px;
     padding: 11px 15px;
     font-family: $font-family;
-    background-color: #ffffff;
+    background-color: $tab-background;
 
     .pri-meeting-list-line {
       padding: 3px 0;
-      line-height: 21px;
-      color: #000;
-      font-size: 17px;
+      line-height: $pri-font-size;
+      color: $pri-font-color;
+      font-size: $font-size-medium-x;
       display: flex;
 
       .line-code {

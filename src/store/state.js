@@ -42,7 +42,7 @@ export default {
   //私人会议列表
   privateMeetingList: [],
   //正在播放会议的Id
-  currentPlayMeetingId: 0,
+  currentPlayMeeting: '',
   //个人中心数目
   personalCenterNum: {
     publishedMeetingCount: 0,
@@ -50,5 +50,7 @@ export default {
     myCollectionCount: 0,
     latestPlayCount: 0,
     downloadCount: 0
-  }
+  },
+  //限制会议
+  restrictedMeetingList: []
 }

@@ -4,9 +4,9 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
-  import ContactList from '../../base/contactList/contactList'
-  import { CONTACT_TYPE } from '../../api/config'
-  import { getPhoneContacts } from '../../common/js/utils'
+  import ContactList from './contactList/contactList'
+  import { CONTACT_TYPE } from 'api/config'
+  import { getPhoneContacts } from 'common/js/utils'
 
   export default {
     components: {

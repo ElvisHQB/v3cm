@@ -23,12 +23,17 @@
 
 <style scoped lang="scss">
   @import "../../common/scss/variable";
+  $head-min-height: 75px;
+  $border-color: #d3d3d3;
+  $per-head-height: 60px;
+  $per-head-width: 60px;
+  $per-head-border-radius: 29px;
 
   .per-head {
     font-family: $font-family;
-    min-height: 75px;
-    background: #fff;
-    border-bottom: 1px solid lightgray;
+    min-height: $head-min-height;
+    background: $tab-background;
+    border-bottom: 1px solid $border-color;
     display: flex;
     align-items: center;
 
@@ -36,13 +41,13 @@
       margin: 0 15px;
 
       .per-head-img-detail {
-        height: 60px;
-        width: 60px;
-        border-radius: 29px;
-        min-width: 60px;
-        max-width: 60px;
-        min-height: 60px;
-        max-height: 60px;
+        height: $per-head-width;
+        width: $per-head-width;
+        border-radius: $per-head-border-radius;
+        min-width: $per-head-width;
+        max-width: $per-head-width;
+        min-height: $per-head-width;
+        max-height: $per-head-width;
       }
     }
 

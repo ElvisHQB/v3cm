@@ -55,6 +55,8 @@
 
 <style scoped lang="scss">
   @import "../../common/scss/variable";
+  $title-color: #000000;
+  $text-height: 21px;
 
   .meeting-info-list {
     margin-top: 6px;
@@ -67,7 +69,7 @@
     .meeting-info-list-main {
 
       .meeting-info-list-title {
-        color: #000000;
+        color: $title-color;
         font-size: $font-size-large;
         overflow : hidden;
         text-overflow: ellipsis;
@@ -80,7 +82,7 @@
         font-family: $font-family;
         color: $color-text;
         font-size: $font-size-medium;
-        line-height: 21px;
+        line-height: $text-height;
         overflow : hidden;
         text-overflow: ellipsis;
         display: -webkit-box;

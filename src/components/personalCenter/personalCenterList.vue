@@ -35,14 +35,17 @@
 
   $color: #5470b5;
   $line-height: 24px;
+  $num-line-height: 18px;
+  $num-border-radius: 10px;
+  $list-icon-more-color: #d3d3d3;
 
   .per-center-list {
-    height: 24px;
+    height: $line-height;
     padding: 11px 15px;
     display: flex;
     border-bottom: 1px solid lightgrey;
     background-color: white;
-    font-size: 17px;
+    font-size: $font-size-large;
     color: $color;
     font-family: $font-family;
 
@@ -59,12 +62,12 @@
 
     .list-num {
       margin-top: 2px;
-      line-height: 18px;
-      height: 18px;
-      min-width: 10px;
+      line-height: $num-line-height;
+      height: $num-line-height;
+      min-width: $num-border-radius;
       padding: 0 5px;
       border: 1px solid $color;
-      border-radius: 10px;
+      border-radius: $num-border-radius;
       background-color: $color;
       font-size: $font-size-small;
       color: white;
@@ -72,8 +75,8 @@
     }
 
     .list-icon-more {
-      line-height: 24px;
-      color: #bbb;
+      line-height: $line-height;
+      color: $list-icon-more-color;
     }
   }
 

@@ -39,8 +39,12 @@
 </script>
 
 <style scoped lang="scss" type="text/scss">
-  $meetingDetail-color: #dd2738;
+  @import "../../common/scss/variable";
+  $tab-item-height: 38px;
   $background-color: #fff;
+  $tab-item-border-color: #dd2738;
+  $tab-item-default-color: #999;
+  $tab-item-active-color: #666;
   .tab-select {
     flex-direction: column;
     .tab-bar {
@@ -49,16 +53,16 @@
         .tab-item  {
           flex: 1;
           text-align: center;
-          line-height: 38px;
-          height: 38px;
-          color: #999;
+          line-height: $tab-item-height;
+          height: $tab-item-height;
+          color: $tab-item-default-color;
           border-bottom: 3px solid $background-color;
-          font-size: 16px;
+          font-size: $font-size-medium-x;
           background-color: $background-color;
         }
         .active {
-          color: #666;
-          border-bottom: 3px solid $meetingDetail-color;
+          color: $tab-item-active-color;
+          border-bottom: 3px solid $tab-item-border-color;
         }
       }
     }

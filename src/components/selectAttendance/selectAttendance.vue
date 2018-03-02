@@ -8,7 +8,7 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
-  import TabSelect from '../../base/tabSelect/tabSelect'
+  import TabSelect from 'base/tabSelect/tabSelect'
   import phoneContact from './phoneContact'
   import iWandContact from './iWandContact'
 

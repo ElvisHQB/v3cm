@@ -2,7 +2,7 @@
   <div class="meeting-detail">
     <!--pdf-->
     <div class="pdf-div">
-      <img src="../../assets/default_pdf.jpg" style="width: 100%">
+      <img src="../../assets/default_pdf.jpg">
     </div>
     <!--会议标题-->
     <div class="meeting-title">
@@ -48,18 +48,20 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import TabSelect from '../../base/tabSelect/tabSelect.vue'
+  import TabSelect from 'base/tabSelect/tabSelect.vue'
   import meetingIntro from './meetingIntroduction.vue'
   import meetingComment from './meetingComment.vue'
   import { getMeetingDetailUrl, getMeetingCommentsDetailUrl } from 'api/config'
   import { SET_MORE_DETAIL_POPUP, SET_MEETING_DETAIL, SET_COMMENT_LIST } from '../../store/mutation-types'
-  import { genMeetingDetailItem, genCommentItem } from '../../common/js/utils'
+  import { MeetingDetail, genCommentItem } from 'common/js/utils'
   import api from 'api/fetchData'
+  import { Popup } from 'mint-ui'
   export default {
     components: {
       TabSelect,
       'meetingIntro': meetingIntro,
-      'meetingComment': meetingComment
+      'meetingComment': meetingComment,
+      'mt-popup': Popup
     },
     data() {
       return {
@@ -104,7 +106,7 @@
         }
         api.getData(url, 'get', { params: params })
           .then((res) => {
-            let meeting = genMeetingDetailItem(res)
+            let meeting = new MeetingDetail(res)
             this.$store.commit(SET_MEETING_DETAIL, meeting)
           })
           .catch((e) => {
@@ -165,43 +167,43 @@
 </script>
 
 <style scoped lang="scss" type="text/scss">
+  @import "../../common/scss/variable";
   $meetingDetail-color: #dd2738;
   $background-color: #fff;
   $meeting-title-height: 50px;
   $player-height: 80px;
+  $share-cancel-btn-height: 40px;
+  $share-icon-size: 42px;
   .meeting-detail {
     .meeting-title {
       height: $meeting-title-height;
     }
     .player {
       height: $player-height;
-      background-color: #999;
-    }
-    .meeting-main {
-      //
     }
     .more-detail {
+      .pdf-div {
+        width: 100%;
+      }
       .share-meeting {
         // TODO 不写固定宽度
         width: 375px;
         background-color: $background-color;
-        font-size: 14px;
+        font-size: $font-size-medium;
         display: flex;
         flex-direction: column;
         .share-select {
           display: flex;
           flex-direction: row;
-          padding: 20px 20px;
+          padding: 20px;
           border-bottom: 1px solid #ddd;
           .share-to-weChat, .share-to-moment {
-            /*width: 60px;*/
-            /*height: 60px;*/
             text-align: center;
             padding: 0 5px;
           }
           img {
-            width: 42px;
-            height: 42px;
+            width: $share-icon-size;
+            height: $share-icon-size;
             text-align: center;
           }
           .share-text {
@@ -210,8 +212,8 @@
           }
         }
         .share-cancel-btn {
-          height: 40px;
-          line-height: 40px;
+          height: $share-cancel-btn-height;
+          line-height: $share-cancel-btn-height;
           text-align: center;
         }
       }

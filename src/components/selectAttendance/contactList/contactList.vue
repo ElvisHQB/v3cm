@@ -40,7 +40,7 @@
               <div class="list-item-img-wrapper">
                 <!--懒加载-->
                 <img :src="'data:image/png;base64,' + item.avatar" v-if="item.avatar"/>
-                <img src="../../assets/default_head.png" v-else/>
+                <img src="../../../assets/default_head.png" v-else/>
               </div>
               <div class="list-item-detail-info">
                 <!--有公司渲染公司，无公司渲染电话-->
@@ -67,11 +67,11 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
-  import Scroll from '../../base/scroll/scroll'
-  import { ADD_ATTENDANCE_TO_LIST, REMOVE_ATTENDANCE_FROM_LIST } from '../../store/mutation-types'
-  import { CONTACT_TYPE } from '../../api/config'
-  import pinyin from '../../common/js/pin-yin'
-  import { isStartWithChinese, isStartWithEnglish } from '../../common/js/utils'
+  import Scroll from 'base/scroll/scroll'
+  import { ADD_ATTENDANCE_TO_LIST, REMOVE_ATTENDANCE_FROM_LIST } from '../../../store/mutation-types'
+  import { CONTACT_TYPE } from 'api/config'
+  import pinyin from 'common/js/pin-yin'
+  import { isStartWithChinese, isStartWithEnglish } from 'common/js/utils'
 
   const ANCHOR_HEIGHT = 18
   export default {
@@ -223,11 +223,17 @@
 </script>
 
 <style scoped lang="scss" type="text/scss">
-  @import "../../common/scss/variable";
+  @import "../../../common/scss/variable";
   $fixed-wrapper-height: 550px;
   $search-contact-height: 34px;
   $background-color: #fff;
   $border-color: #e3e3e3;
+  $icon-font-size: 20px;
+  $icon-font-color: #999;
+  $search-no-data-color: #bbb;
+  $list-group-background-color: #eee;
+  $list-background-color: #fff;
+  $list-item-img-size: 42px;
   @mixin item-more-info {
     overflow: hidden;
     white-space: nowrap;
@@ -259,28 +265,28 @@
         input {
           flex: 8;
           outline: none;
-          font-size: 16px;
-          /*-webkit-appearance: none;*/
+          font-size: $font-size-medium-x;
+          -webkit-appearance: none;
         }
         input[type="search"]::-webkit-search-cancel-button{
           display: none;
         }
         .icon-fangdajing, .icon-clear {
-          font-size: 20px;
-          color: #999;
+          font-size: $icon-font-size;
+          color: $icon-font-color;
         }
       }
       .search-span {
         @include vertical-center;
         text-align: center;
-        font-size: 16px;
+        font-size: $font-size-medium-x;
         .icon-fangdajing {
-          font-size: 20px;
+          font-size: $icon-font-size;
         }
       }
     }
     .contact-list {
-      background-color: #efeff4;
+      /*background-color: #efeff4;*/
       width: 100%;
       //TODO 固定高度？
       height: $fixed-wrapper-height;
@@ -288,22 +294,22 @@
       .search-no-data {
         padding: 30px 15px;
         text-align: center;
-        font-size: 14px;
-        color: #bbb;
+        font-size: $font-size-medium;
+        color: $search-no-data-color;
       }
       .list-group {
-        background-color: #eee;
+        background-color: $list-group-background-color;
         .list-group-key {
           padding: 3px 20px 0 20px;
-          font-size: 16px;
-          background-color: #eee;
+          font-size: $font-size-medium-x;
+          background-color: $list-group-background-color;
         }
         .list-group-item {
           display: flex;
           flex-direction: row;
           padding: 8px 40px 8px 20px;
           margin-top: 3px;
-          background-color: #fff;
+          background-color: $list-background-color;
           /* span 模拟 CheckBox */
           .list-item-checkbox {
             position: relative;
@@ -331,36 +337,35 @@
               border: none;
               .icon-wrapper {
                 display: inline;
-                color: #dd2738;
-                font-size: 24px;
+                color: $color-theme;
+                font-size: $icon-size-large;
               }
             }
           }
           .list-item-img-wrapper {
             margin-right: 10px;
             img {
-              border: 2px solid #e5edff;
+              border: 2px solid $list-background-color;
               border-radius: 50%;
-              width: 42px;
-              height: 42px;
+              width: $list-item-img-size;
+              height: $list-item-img-size;
             }
           }
           .list-item-detail-info {
             width: 220px;
-            /*width: 100%;*/
             .name {
               @include item-more-info;
-              font-size: 16px;
+              font-size: $font-size-medium-x;
               color: #000;
             }
             .company {
               @include item-more-info;
-              font-size: 14px;
+              font-size: $font-size-medium;
               color: #999;
             }
             .phoneNum {
               @include item-more-info;
-              font-size: 14px;
+              font-size: $font-size-medium;
               color: #999;
             }
           }

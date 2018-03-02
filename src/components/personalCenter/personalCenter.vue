@@ -35,18 +35,21 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import perList from '../../base/personalCenterList/personalCenterList'
-  import perHead from '../../base/personalCenterList/personalCenterHead'
+  import perList from './personalCenterList'
+  import perHead from './personalCenterHead'
   import {getUserInfoUrl, defaultHead, getUserHeadPortraitByCRMIdUrl} from '../../api/config'
   import api from '../../api/fetchData'
-  import * as ERR_CODE from '../../api/errorCode'
-  import {getDownloadItemCount, openDownloadPage} from '../../api/native'
+  import ERR_CODE from '../../api/errorCode'
+  import {getDownloadItemCount, openDownloadPage, closeWebView} from '../../api/native'
   import {getLatestPlayArray} from '../../common/js/utils'
   import {SET_PERSONAL_CENTER_COUNT} from '../../store/mutation-types'
+  import { MessageBox, Loadmore } from 'mint-ui'
 
   export default {
     components: {
-      perList, perHead
+      perList,
+      perHead,
+      'mt-loadmore': Loadmore
     },
     mounted() {
       this._getUserInfo()
@@ -78,7 +81,7 @@
         const url = getUserInfoUrl
         return api.getData(url, 'get')
           .then((res) => {
-            this.name = res.name
+            this.name = res.name ? res.name : '未认证用户'
             this.inst = res.institutionName
             this._getUserHeadPortrait(res.crmId)
             // TODO mutation state
@@ -90,8 +93,23 @@
             this.$store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'download', num: getDownloadItemCount()})
             console.log('____log______')
           }).catch((e) => {
-            console.log(e)
-            console.log(ERR_CODE)
+            console.log(e.response)
+            let response = e.response.data ? e.response.data : false
+            if (response && response.errorMsg) {
+              if (response.errorCode === ERR_CODE.LOGIN_ERR.CODE) {
+                MessageBox.alert(ERR_CODE.LOGIN_ERR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              } else {
+                MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                  closeWebView(true)
+                })
+              }
+            } else {
+              MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
+                closeWebView(true)
+              })
+            }
           })
       },
       _getUserHeadPortrait(crmId) {
@@ -113,8 +131,6 @@
             // TODO mutation state
             console.log('____log______')
           }).catch((e) => {
-            console.log(e)
-            console.log(ERR_CODE)
           })
       },
       _getLatestPlayCount() {
@@ -129,10 +145,11 @@
 </script>
 
 <style scoped lang="scss" type="text/scss">
+  $load-more-height: 550px;
   .per-center {
     .scroll-list-wrapper {
       .load-more {
-        height: 550px;
+        height: $load-more-height;
       }
     }
   }

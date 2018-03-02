@@ -22,9 +22,9 @@
       <div class="list-right-content">
         <!--会议标题时间及主讲人信息-->
         <div class="right-p-wrapper">
-          <p class="right-p-title">{{ item.title }}</p>
-          <p class="right-p-speaker-sponsor"><span class="speaker">{{ item.lecturer }}</span><span class="sponsor">{{ item.sponsor }}</span></p>
-          <p class="right-p-time">{{ item.meetingTime }}</p>
+          <p>{{ item.title }}</p>
+          <p><span>{{ item.lecturer }}</span><span>{{ item.sponsor }}</span></p>
+          <p>{{ item.meetingTime }}</p>
         </div>
         <!--渲染推荐状态标识-->
         <div v-if="renderRecommend"  class="recommend-mark">
@@ -71,7 +71,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { detailAuthentication, getAudioUrl, getDocument, getMeetingPlayback } from '../../common/js/httpRequests'
+  import { detailAuthentication, getAudioUrl, getDocument, getMeetingPlayback } from 'common/js/httpRequests'
 
   export default {
     props: {
@@ -132,8 +132,7 @@
         getAudioUrl(id, audioId, title, true, self)
       },
       clickVideo(item) {
-        let self = this
-        getMeetingPlayback(item, self)
+        getMeetingPlayback(item)
       }
     }
   }
@@ -193,7 +192,7 @@
         .right-p-wrapper {
           /*padding-right: 20px;*/
           line-height: $list-line-height;
-          .right-p-title {
+          p:nth-child(1) {
             font-size: $font-size-medium-x;
             padding-right: 30px;
             margin-bottom: 7px;
@@ -206,7 +205,7 @@
             //TODO 兼容性较差寻找更好的方式实现
             -webkit-line-clamp: 2;
           }
-          .right-p-speaker-sponsor {
+          p:nth-child(2) {
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -215,12 +214,12 @@
             line-height: $list-line-height;
             max-height: $list-line-height;
             -webkit-line-clamp: 1;
-            .speaker {
+            span:first-child {
               margin-right: 10px;
               color: $speaker-color;
             }
           }
-          .right-p-time {
+          p:nth-child(3) {
             .days, .weeks, .hours {
               margin-right: 5px;
             }

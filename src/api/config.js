@@ -2,7 +2,8 @@
 const sessionid = ''
 const debug = process.env.NODE_ENV !== 'production'
 export const HOST = debug ? '//114.80.154.45/3CWeb' : '/3CWeb'
-export const sid = debug ? '128f40188a1d4cb4a0af27af2c447c9f' : sessionid
+// export const HOST = debug ? '//10.102.16.202:8080/3CWeb' : '/3CWeb'
+export const sid = debug ? 'e8fd12a1669845f2830dfa894b2fbda1' : sessionid
 export const defaultLogo = '/assets/logo.png'
 export const defaultType = 'PHONEWEB'
 export const defaultTime = '时间待定'
@@ -62,3 +63,7 @@ export const getMeetingInfoDetail = HOST + '/getOfflineMeetingDetail.json'
 export const isCrmRestrictedForMeeting = HOST + '/isCrmRestrictedForMeeting.json'
 //播放错误日志
 export const addUserLogOfPlayFailed = HOST + 'addUserLogOfPlayFailed.json'
+//创建公开会议
+export const createPublicMeetingUrl = HOST + '/createPublicMeeting.json'
+//创建私人会议
+export const createPrivateMeetingUrl = HOST + '/createPrivateMeeting.json'
