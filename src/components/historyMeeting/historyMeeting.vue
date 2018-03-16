@@ -4,15 +4,22 @@
       <selector :title="hisTitle" :subTitle="hisSubTitle" :selectorVal="hisMeetingVal"
                 @searchVal="_searchValChange"></selector>
     </div>
-    <scroll-list :listData="historyMeeting" :noMore="noMoreData" v-on:loadTop="_getHistoryMeeting(1)"
-                 v-on:loadBottom="_getHistoryMeeting(currentPage + 1)"></scroll-list>
+    <scroll :data="historyMeeting" :pullDownRefresh="pullDownRefresh" :pullUpLoad="pullUpLoad" :bounce="true"
+            @pullingDown="_getHistoryMeeting(1)"
+            @pullingUp="_getHistoryMeeting(currentPage + 1)"
+            class="scroll" ref="scroll">
+      <div>
+        <list-view :item="item" v-for="(item, index) in historyMeeting" :key="index"></list-view>
+      </div>
+    </scroll>
   </div>
 
 </template>
 
 <script type="text/ecmascript-6">
   import selector from '../../base/selector/selector'
-  import ScrollList from '../../base/scrollList/scrollList'
+  import ListView from '../../base/listView/listView'
+  import Scroll from 'base/scroll/scroll'
   import { Meeting } from '../../common/js/utils'
   import {getHistoryMeetingUrl} from '../../api/config'
   import api from '../../api/fetchData'
@@ -34,7 +41,7 @@
   export default {
     name: 'historyMeeting',
     components: {
-      selector, ScrollList
+      selector, Scroll, ListView
     },
     mounted() {
       this._getHistoryMeeting(1)
@@ -46,6 +53,13 @@
     },
     data() {
       return {
+        pullDownRefresh: {
+          threshold: 50,
+          stop: 40
+        },
+        pullUpLoad: {
+          threshold: 50
+        },
         hisTitle: hisCategory,
         hisSubTitle: hisDetail,
         hisMeetingVal: hisDetailValue,
@@ -133,8 +147,6 @@
 </script>
 
 <style scoped lang="scss">
-  $selector-border-width: 2px;
-  $selector-border-color: #efeff4;
 
   .history-meeting-body {
     display: flex;
@@ -146,7 +158,10 @@
       width: 100%;
       top: 44px;
       z-index: 99;
-      border-bottom: $selector-border-width solid $selector-border-color;
+    }
+
+    .scroll {
+      height: 620px;
     }
   }
 </style>

@@ -37,9 +37,8 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import ScrollList from '../../../base/scrollList/scrollList'
   import {getBookMarkedMeetingListUrl} from '../../../api/config'
-  import {genMeetingListItem} from '../../../common/js/utils'
+  import {Meeting} from '../../../common/js/utils'
   import {bookmarkMeeting} from '../../../common/js/httpRequests'
   import api from '../../../api/fetchData'
   import ERR_CODE from '../../../api/errorCode'
@@ -51,7 +50,6 @@
   export default {
     name: 'my-collection',
     components: {
-      ScrollList,
       ListView,
       'mt-cell-swipe': CellSwipe,
       'mt-loadmore': Loadmore
@@ -113,7 +111,7 @@
           .then((res) => {
             let meetingList = []
             for (let item of res.list) {
-              let meeting = genMeetingListItem(item)
+              let meeting = new Meeting(item)
               meetingList.push(meeting)
             }
             // 没有更多数据
@@ -163,7 +161,7 @@
         margin-top: $cell-swipe-margin;
        /deep/ .mint-cell-wrapper {
           font-size: $font-size-small;
-         /deep/ .mint-cell-title {
+          .mint-cell-title {
            max-width: 0;
          }
         }

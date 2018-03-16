@@ -71,7 +71,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { detailAuthentication, getAudioUrl, getDocument, getMeetingPlayback } from 'common/js/httpRequests'
+  import { detailAuthentication, getAudioUrl, getDocument, getMeetingPlayback } from '../../common/js/httpRequests'
 
   export default {
     props: {
@@ -257,7 +257,7 @@
           flex: 1;
           color: #999;
           text-align: center;
-          font-size: 14px;
+          font-size: $font-size-medium;
         }
       }
     }

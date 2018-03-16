@@ -8,7 +8,7 @@
 <script type="text/ecmascript-6">
   import ScrollList from '../../../base/scrollList/scrollList'
   import {getMyMeetingListUrl} from '../../../api/config'
-  import {genMeetingListItem} from '../../../common/js/utils'
+  import { Meeting } from '../../../common/js/utils'
   import api from '../../../api/fetchData'
   import ERR_CODE from '../../../api/errorCode'
   import {SET_PUBLISHED_MEETING_LIST} from '../../../store/mutation-types'
@@ -51,7 +51,7 @@
           .then((res) => {
             let meetingList = []
             for (let item of res.list) {
-              let meeting = genMeetingListItem(item)
+              let meeting = new Meeting(item)
               meetingList.push(meeting)
             }
             // 没有更多数据

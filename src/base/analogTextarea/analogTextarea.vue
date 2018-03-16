@@ -1,9 +1,9 @@
 <template>
   <div class="analog-textarea-wrapper">
     <div @input="onInputChange($event.target.textContent)" :placeholder="placeholderText"
-         contenteditable="true" class="analog-textarea">
+         contenteditable="true" class="analog-textarea" ref="textarea">
     </div>
-    <div v-bind:class="[{ 'count-exceed': countExceed }, 'counter']">
+    <div :class="[{ 'count-exceed': countExceed }, 'counter']">
       <span class="">{{ currentCount }}</span>
       <span>/</span>
       <span>{{ maxCount }}</span>
@@ -28,6 +28,10 @@
       message: {
         type: String,
         default: ''
+      },
+      clearContent: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
@@ -48,6 +52,11 @@
             duration: 3000
           })
         }
+      }
+    },
+    watch: {
+      clearContent: function () {
+        this.$refs.textarea.innerHTML = ''
       }
     }
   }

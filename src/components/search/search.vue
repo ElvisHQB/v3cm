@@ -17,10 +17,18 @@
       <!--搜索结果列表-->
       <div v-if="hasResult">
         <!--搜索结果列表-->
-        <scroll-list :listData="searchMeeting" :noMore="noMoreData"
-                     v-on:loadTop="_searchMeeting(searchStr, firstPage, pageSize)"
-                     v-on:loadBottom="_searchMeeting(searchStr, currentPage + 1, pageSize)">
-        </scroll-list>
+        <!--<scroll-list :listData="searchMeeting" :noMore="noMoreData"-->
+                     <!--v-on:loadTop="_searchMeeting(searchStr, firstPage, pageSize)"-->
+                     <!--v-on:loadBottom="_searchMeeting(searchStr, currentPage + 1, pageSize)">-->
+        <!--</scroll-list>-->
+        <scroll :data="searchMeeting" :pullDownRefresh="pullDownRefresh" :pullUpLoad="pullUpLoad" :bounce="true"
+                @pullingDown="_searchMeeting(searchStr, firstPage, pageSize)"
+                @pullingUp="_searchMeeting(searchStr, currentPage + 1, pageSize)"
+                class="scroll" ref="scroll">
+          <div>
+            <list-view :item="item" v-for="(item, index) in searchMeeting" :key="index"></list-view>
+          </div>
+        </scroll>
       </div>
       <!--无结果的空列表-->
       <div class="empty-result-list" v-else>
@@ -31,21 +39,28 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import ScrollList from '../../base/scrollList/scrollList'
+  import Scroll from 'base/scroll/scroll'
+  import ListView from 'base/listView/listView'
   import { searchMeetingUrl } from 'api/config'
   import api from 'api/fetchData'
   import { SET_SEARCH_MEETING_LIST, SET_SEARCH_STR } from '../../store/mutation-types'
-  import { Meeting } from '../../common/js/utils'
+  import { Meeting } from 'common/js/utils'
 
   export default {
     name: 'search',
     components: {
-      ScrollList
+      Scroll,
+      ListView
     },
     data() {
       return {
-        // 搜索会议结果列表
-//        searchedMeeting: [],
+        pullDownRefresh: {
+          threshold: 50,
+          stop: 40
+        },
+        pullUpLoad: {
+          threshold: 50
+        },
         histories: [],
         // 是否进行的搜索动作
         searched: false,
@@ -112,6 +127,10 @@
       },
       //搜索会议
       _searchMeeting(searchStr, currentPage, pageSize) {
+        if (this.noMoreData) {
+          this.$refs.scroll.forceUpdate(false)
+          return
+        }
         this.currentPage = currentPage
         this.searched = true
         this._setHistory(searchStr)
@@ -135,7 +154,7 @@
             }
             let meetingList = []
             for (let meeting of res.list) {
-              meetingList.push(Meeting(meeting))
+              meetingList.push(new Meeting(meeting))
             }
             this.noMoreData = meetingList.length < pageSize
             if (currentPage === 1) {
@@ -168,8 +187,6 @@
   $clear-history-button-color: #dd524d;
   $empty-result-list-color: #ccc;
   $search-history-item-color: rgba(173, 173, 173, 0.44);
-  //$search-header-height: 44px;
-  //$search-header-color: #dd2738;
   .search-wrapper {
     .search-history {
       font-size: $font-size-medium;
@@ -209,6 +226,9 @@
       }
     }
     .search-result {
+      .scroll {
+        height: 620px;
+      }
       .empty-result-list {
         font-size: $font-size-medium-x;
         color: $empty-result-list-color;

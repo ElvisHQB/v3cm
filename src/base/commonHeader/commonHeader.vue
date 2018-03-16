@@ -202,6 +202,7 @@
     line-height: $header-height;
     color: $color-text-ll;
     background-color: $color-theme;
+    z-index: 999;
     .header-left {
       flex: 1.5;
     }

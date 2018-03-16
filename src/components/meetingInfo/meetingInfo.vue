@@ -35,7 +35,7 @@
 <script type="text/ecmascript-6">
   import selector from '../../base/selector/selector'
   import meetingInfoList from './meetingInfoList'
-  import {genMeetingInfoListItem} from '../../common/js/utils'
+  import {MeetingInfo} from '../../common/js/utils'
   import {getOfflineMeetingListUrl} from '../../api/config'
   import api from '../../api/fetchData'
   import ERR_CODE from '../../api/errorCode'
@@ -160,7 +160,7 @@
           .then((res) => {
             let meetingList = []
             for (let meeting of res.list) {
-              let meetingItem = genMeetingInfoListItem(meeting)
+              let meetingItem = new MeetingInfo(meeting)
               meetingList.push(meetingItem)
             }
             // 没有更多数据
@@ -212,8 +212,6 @@
 
 <style scoped lang="scss">
   @import "../../common/scss/variable";
-  $selector-border-width: 2px;
-  $selector-border-color: #efeff4;
   $pull-buttom-height: 40px;
   $pull-buttom-text-height: 24px;
   $pull-buttom-text-color: #777;
@@ -228,7 +226,6 @@
       width: 100%;
       top: 44px;
       z-index: 99;
-      border-bottom: $selector-border-width solid $selector-border-color;
     }
 
     .pull-bottom-wrapper {

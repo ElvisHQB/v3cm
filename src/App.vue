@@ -2,11 +2,9 @@
   <div id="app">
     <common-header class="header"></common-header>
     <div class="main">
-      <div v-show="mainDisplay">
-        <keep-alive>
-          <router-view></router-view>
-        </keep-alive>
-      </div>
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
     </div>
     <tab v-show="tabDisplay" class="tab"></tab>
   </div>
@@ -14,31 +12,30 @@
 
 <script>
   import ERR_CODE from './api/errorCode'
-  import { loginUrl, sid } from './api/config'
+  import {loginUrl, sid} from './api/config'
   import api from './api/fetchData'
   import Tab from 'base/tab/tab'
   import CommonHeader from 'base/commonHeader/commonHeader'
-  import { mapMutations } from 'vuex'
+  import {mapMutations} from 'vuex'
   import {closeWebView} from './api/native'
-  import { SET_SERVERINFO } from './store/mutation-types'
-  import { MessageBox } from 'mint-ui'
+  import {SET_SERVERINFO} from './store/mutation-types'
+  import {MessageBox} from 'mint-ui'
 
   export default {
     name: 'App',
-    data () {
+    data() {
       return {
-        tabDisplay: true,
-        mainDisplay: false
+        tabDisplay: true
       }
     },
     components: {
       Tab, CommonHeader
     },
-    created () {
+    created() {
       this._login(sid)
     },
     methods: {
-      _login (sessionid) {
+      _login(sessionid) {
         const url = loginUrl
         return api.getData(url, 'get', {
           params: {'windsessionid': sessionid}
@@ -50,7 +47,8 @@
           if (res) {
             this.userInfo(res)
             this.sessionId(sessionid)
-            this.mainDisplay = true
+            console.log('router:' + this.$route.path)
+            this.$router.push(this.$route.path)
           } else {
             MessageBox.alert(ERR_CODE.NO_DATE_ERROR.MSG).then(action => {
               //TODO

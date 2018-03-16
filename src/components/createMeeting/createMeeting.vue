@@ -10,8 +10,8 @@
 
 <script type="text/ecmascript-6">
   import TabSelect from 'base/tabSelect/tabSelect'
-  import publicMeeting from './publicMeeting'
-  import privateMeeting from './privateMeeting'
+  import publicMeeting from './createPublicMeeting'
+  import privateMeeting from './createPrivateMeeting'
 
   export default {
     name: 'createMeeting',

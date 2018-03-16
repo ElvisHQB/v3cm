@@ -3,7 +3,7 @@ const sessionid = ''
 const debug = process.env.NODE_ENV !== 'production'
 export const HOST = debug ? '//114.80.154.45/3CWeb' : '/3CWeb'
 // export const HOST = debug ? '//10.102.16.202:8080/3CWeb' : '/3CWeb'
-export const sid = debug ? 'e8fd12a1669845f2830dfa894b2fbda1' : sessionid
+export const sid = debug ? '985bb4abf35f42739e65559ee1fed850' : sessionid
 export const defaultLogo = '/assets/logo.png'
 export const defaultType = 'PHONEWEB'
 export const defaultTime = '时间待定'

@@ -30,7 +30,7 @@
 <script type="text/ecmascript-6">
   import PriMeetingList from './privateMeetingList'
   import {getMyPrivateMeetingUrl} from '../../../api/config'
-  import {genPrivateMeetingList} from '../../../common/js/utils'
+  import {PrivateMeeting} from '../../../common/js/utils'
   import api from '../../../api/fetchData'
   import ERR_CODE from '../../../api/errorCode'
   import { closeWebView } from '../../../api/native'
@@ -90,7 +90,7 @@
           .then((res) => {
             let meetingList = []
             for (let meeting of res.list) {
-              let meetingItem = genPrivateMeetingList(meeting)
+              let meetingItem = new PrivateMeeting(meeting)
               meetingList.push(meetingItem)
             }
             // 没有更多数据

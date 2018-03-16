@@ -8,13 +8,26 @@ import store from './store'
 import router from './router'
 import 'common/scss/icon.scss'
 import 'lib-flexible/flexible.js'
-import { Lazyload } from 'mint-ui'
+import {Lazyload} from 'mint-ui'
 
 // require('./mock/mock.js')
 
 Vue.config.productionTip = false
 // Vue.use(MintUI)
 Vue.use(Lazyload)
+
+router.beforeEach((to, from, next) => {
+  next(false)
+  if (to.meta.requireAuth) {
+    console.log(to.path)
+    if (store.getters.sessionid) {
+      next()
+    }
+  } else {
+    console.log('no requireAuth')
+    next()
+  }
+})
 
 /* eslint-disable no-new */
 new Vue({
