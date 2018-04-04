@@ -12,6 +12,7 @@ import MyCollection from 'components/personalCenter/myCollection/myCollection'
 import LatestPlay from 'components/personalCenter/latestPlay/latestPlay'
 import MeetingDetail from 'components/meetingDetail/meetingDetail'
 import SelectAttendance from 'components/selectAttendance/selectAttendance'
+import Login from 'components/login/login'
 
 Vue.use(Router)
 
@@ -32,7 +33,7 @@ export default new Router({
     {
       path: '/historyMeeting',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: HistoryMeeting
     },
@@ -40,72 +41,76 @@ export default new Router({
       path: '/meetingDetail/:meetingId',
       name: 'meetingDetail',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: MeetingDetail
     },
     {
       path: '/meetingInfo',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: MeetingInfo
     },
     {
       path: '/personalCenter',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: PersonalCenter
     },
     {
       path: '/search',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: Search
     },
     {
       path: '/createMeeting',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: CreateMeeting
     },
     {
       path: '/selectAttendance',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: SelectAttendance
     },
     {
       path: '/personalCenter/publishedMeeting',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: PublishedMeeting
     },
     {
       path: '/personalCenter/privateMeeting',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: PrivateMeeting
     },
     {
       path: '/personalCenter/myCollection',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: MyCollection
     },
     {
       path: '/personalCenter/latestPlay',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: LatestPlay
+    },
+    {
+      path: '/login',
+      component: Login
     }
   ]
 })

@@ -49,12 +49,13 @@
 
 <style scoped lang="scss" type="text/scss">
   @import "../../common/scss/variable";
+  $tab-height: 40px;
 
   .tab {
     display: flex;
     position: relative;
-    height: 40px;
-    line-height: 40px;
+    height: $tab-height;
+    line-height: $tab-height;
     background-color: $tab-background;
     box-shadow: 0px 2px 12px #c5c5c5;
 

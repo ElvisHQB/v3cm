@@ -12,9 +12,9 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { openWebView } from '../../api/native'
-  import { getMeetingInfoDetail } from '../../api/config'
-  import api from '../../api/fetchData'
+  import { openWebView } from 'api/native'
+  import { getMeetingInfoDetail } from 'api/config'
+  import api from 'api/fetchData'
 
   export default {
     name: 'meeting-info-list',

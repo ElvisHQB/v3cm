@@ -14,9 +14,18 @@
   export default {
     name: 'personal-center-head',
     props: {
-      imgUrl: '',
-      userName: '',
-      inst: ''
+      imgUrl: {
+        type: String,
+        default: ''
+      },
+      userName: {
+        type: String,
+        default: ''
+      },
+      inst: {
+        type: String,
+        default: ''
+      }
     }
   }
 </script>

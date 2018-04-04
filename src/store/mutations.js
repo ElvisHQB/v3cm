@@ -4,11 +4,8 @@ const mutations = {
   [types.SET_USER_INFO](state, userInfo) {
     state.userInfo = userInfo
   },
-  [types.SET_SEARCH_MEETING_LIST](state, searchMeetingList) {
-    state.searchMeetingList = searchMeetingList
-  },
-  [types.SET_SEARCH_STR](state, searchStr) {
-    state.searchStr = searchStr
+  [types.SET_HEADER_SEARCH_STR](state, searchStr) {
+    state.headerSearchStr = searchStr
   },
   [types.SET_NEWEST_MEETING_LIST](state, newestMeetingList) {
     state.newestMeetingList = newestMeetingList
@@ -43,8 +40,11 @@ const mutations = {
   [types.SET_LATESTPLAY_MEETING_LIST](state, latestPlayMeetingList) {
     state.latestPlayMeetingList = latestPlayMeetingList
   },
-  [types.SET_MORE_DETAIL_POPUP](state, moreDetail) {
-    state.moreDetailPopup = moreDetail
+  [types.SET_HEADER_MORE_POPUP](state, morePopup) {
+    state.headerMorePopup = morePopup
+  },
+  [types.TOGGLE_HEADER_MORE_POPUP](state) {
+    state.headerMorePopup = !state.headerMorePopup
   },
   [types.SET_MEETING_DETAIL](state, meetingDetail) {
     state.meetingDetail = meetingDetail
@@ -71,8 +71,16 @@ const mutations = {
     }
     state.attendanceList = arr
   },
-  [types.SET_IWAND_CONTACT_LIST](state, iWandContactList) {
-    state.iWandContactList = iWandContactList
+  [types.SET_IWIND_CONTACT_LIST](state, iWindContactList) {
+    state.iWindContactList = iWindContactList
+  },
+  [types.MERGE_IWIND_CONTACT_LIST] (state, userAvatarList) {
+    let index = 0
+    for (let users of state.iWindContactList) {
+      for (let user of users.userList) {
+        user.avatar = userAvatarList[index++].iconData
+      }
+    }
   },
   [types.SET_PHONE_CONTACT_LIST](state, phoneContactList) {
     state.phoneContactList = phoneContactList
@@ -117,6 +125,9 @@ const mutations = {
   //设置session
   [types.SET_SESSIONID](state, sessionid) {
     state.sessionid = sessionid
+  },
+  [types.SET_APP_INFO](state, info) {
+    state.appInfo = info
   }
 }
 

@@ -3,27 +3,27 @@
     <div class="selector-tab">
       <div class="selector-tab-item" :class="{'selector-tab-item-active': isShow[index]}" :title="title"
            v-for="(item,index) in title" :key="index"
-           @click.stop="_selectTab(index,title.length)">
+           @click.stop="_selectTabTitle(index,title.length)">
         <div><span class="selector-span" :class="{'selector-span-active': isShow[index]}">{{item}}
           <i :class="[isShow[index] ? iconXiangShang : iconXiangXia]"></i></span></div>
       </div>
     </div>
     <div class="selector-list-wrap" key="1">
-      <transition-group name="fade">
-        <div ref="seList" class="selector-list" v-for="(item,index) in subTitle" :key="index" :id="index"
+      <transition-group name="fade"
+                        enter-active-class="fadeInDown"
+                        leave-active-class="fadeOutUp">
+        <div ref="seList" class="animated selector-list" v-for="(item,index) in subTitle" :key="index" :id="index"
              v-show="isShow[index]" :class="[isShow[index] || isChooseAnother ? fadeLeaveShort : fadeLeaveLong]">
           <button class="selector-list-button" v-for="(n, indexDetail) in item" :key="n"
-                  @click="_chooseThis(n,index,indexDetail)">
+                  @click="_chooseTabListItem(n,index,indexDetail)">
             {{n}}
           </button>
         </div>
       </transition-group>
     </div>
-    <transition-group name="fadeShadow">
-      <div class="selector-shadow" v-for="(item,index) in subTitle" :key="index" v-show="isShow[index]"
-           v-bind:style="{height: height + 'px'}">
-      </div>
-    </transition-group>
+    <div class="selector-shadow" v-for="(item,index) in subTitle" :key="item.id" v-show="isShow[index]"
+         v-bind:style="{height: height + 'px'}" @click="_handleShadowClick">
+    </div>
   </div>
 </template>
 
@@ -44,12 +44,26 @@
       }
     },
     props: {
-      title: '',
-      subTitle: '',
-      selectorVal: ''
+      title: {
+        type: Array,
+        default: function () {
+          return []
+        }
+      },
+      subTitle: {
+        type: Array,
+        default: function () {
+          return []
+        }
+      },
+      selectorVal: {
+        type: Array,
+        default: function () {
+          return []
+        }
+      }
     },
     mounted() {
-      document.addEventListener('click', this._handleDocumentClick)
       this._setShow()
     },
     methods: {
@@ -59,7 +73,7 @@
           this.$set(this.storeTitle, i, this.title[i])
         }
       },
-      _chooseThis(msg, index, indexDetail) {
+      _chooseTabListItem(msg, index, indexDetail) {
         this.$emit('searchVal', index, indexDetail)
         if (msg === '全部') {
           this.$set(this.title, index, this.storeTitle[index])
@@ -68,7 +82,7 @@
         }
         this.$set(this.isShow, index, false)
       },
-      _selectTab(index, length) {
+      _selectTabTitle(index, length) {
         this.isChooseAnother = false
         let tabIsShow = false
         let tabIndex = -1
@@ -93,7 +107,7 @@
           }
         }
       },
-      _handleDocumentClick(e) {
+      _handleShadowClick(e) {
         if (e.target.className !== 'selector-list' && e.target.className !== 'selector-tab-item' && e.target.className !== 'selector-span') {
           this.isChooseAnother = false
           for (let i in this.isShow) {
@@ -107,6 +121,7 @@
 
 <style scoped lang='scss'>
   @import "../../common/scss/variable";
+  @import "../../common/lib/css/animate.min.css";
 
   $selector-font-size: 15px;
   $selector-tab-height: 38px;
@@ -133,7 +148,7 @@
       background-color: $selector-background;
       border-bottom: $selector-tab-border-width solid $selector-tab-border-color;
       position: relative;
-      z-index: 99;
+      z-index: $z-index-level-9;
 
       .selector-tab-item {
         flex: 1;
@@ -149,42 +164,6 @@
 
       .selector-tab-item-active {
         border-bottom: 2px solid $selector-active;
-      }
-    }
-
-    .fade-enter-active, .fade-enter {
-      animation-name: fold-in;
-      animation-duration: 0.5s;
-    }
-    /*.fade-leave, .fade-leave-active {*/
-      /*animation-name: fold-out;*/
-      /*animation-duration: 0.5s;*/
-    /*}*/
-
-    .fade-leave-active-short {
-    }
-
-    .fade-leave-active-long {
-      animation-name: fold-out;
-      animation-duration: 0.5s;
-    }
-
-    @keyframes fold-in {
-      from {
-        transform: translate3d(0, -100%, 0);
-      }
-
-      to {
-        transform: translate3d(0, 0, 0);
-      }
-    }
-    @keyframes fold-out {
-      from {
-        transform: translate3d(0, 0, 0);
-      }
-
-      to {
-        transform: translate3d(0, -100%, 0);
       }
     }
 
@@ -209,7 +188,7 @@
     .selector-shadow {
       width: 100%;
       background-color: $selector-shadow-color;
-      z-index: -1;
+      z-index: $z-index-level-0;
       opacity: 0.1;
       position: absolute;
       top: 0;

@@ -4,12 +4,14 @@
       <selector :title="hisTitle" :subTitle="hisSubTitle" :selectorVal="hisMeetingVal"
                 @searchVal="_searchValChange"></selector>
     </div>
-    <scroll :data="historyMeeting" :pullDownRefresh="pullDownRefresh" :pullUpLoad="pullUpLoad" :bounce="true"
+    <scroll :data="historyMeeting" :pullDownRefresh="true" :pullUpLoad="true"
             @pullingDown="_getHistoryMeeting(1)"
             @pullingUp="_getHistoryMeeting(currentPage + 1)"
-            class="scroll" ref="scroll">
+            :style="scrollStyle" ref="scroll">
       <div>
-        <list-view :item="item" v-for="(item, index) in historyMeeting" :key="index"></list-view>
+        <list-view :item="item" v-for="(item, index) in historyMeeting" :key="index" @click="_onClick(item.id, item.isRestricted)">
+          <operation slot="operation" :item="item"></operation>
+        </list-view>
       </div>
     </scroll>
   </div>
@@ -17,15 +19,17 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import selector from '../../base/selector/selector'
-  import ListView from '../../base/listView/listView'
+  import selector from 'base/selector/selector'
+  import ListView from 'base/listView/listView'
+  import Operation from 'base/listView/operation'
   import Scroll from 'base/scroll/scroll'
-  import { Meeting } from '../../common/js/utils'
-  import {getHistoryMeetingUrl} from '../../api/config'
-  import api from '../../api/fetchData'
-  import ERR_CODE from '../../api/errorCode'
-  import {SET_HISTORY_MEETING_LIST} from '../../store/mutation-types'
-  import { closeWebView } from '../../api/native'
+  import { Meeting } from 'common/js/utils'
+  import { getHistoryMeetingUrl, HEADER_HEIGHT, TAB_HEIGHT, SELECTOR_HEIGHT } from 'api/config'
+  import api from 'api/fetchData'
+  import ERR_CODE from 'api/errorCode'
+  import { mapGetters, mapMutations } from 'vuex'
+  import { closeWebView } from 'api/native'
+  import { detailAuthentication } from 'common/js/httpRequests'
   import { MessageBox } from 'mint-ui'
 
   const hisCategory = ['类型', '领域']
@@ -41,25 +45,24 @@
   export default {
     name: 'historyMeeting',
     components: {
-      selector, Scroll, ListView
+      selector, Scroll, ListView, Operation
     },
     mounted() {
       this._getHistoryMeeting(1)
     },
     computed: {
-      historyMeeting() {
-        return this.$store.getters.historyMeetingList
+      ...mapGetters({
+        historyMeeting: 'historyMeetingList',
+        restrictedMeeting: 'restrictedMeetingList',
+        appInfo: 'appInfo'
+      }),
+      scrollStyle() {
+        const scrollHeight = this.appInfo.height - HEADER_HEIGHT - TAB_HEIGHT - SELECTOR_HEIGHT
+        return 'height:' + scrollHeight + 'px'
       }
     },
     data() {
       return {
-        pullDownRefresh: {
-          threshold: 50,
-          stop: 40
-        },
-        pullUpLoad: {
-          threshold: 50
-        },
         hisTitle: hisCategory,
         hisSubTitle: hisDetail,
         hisMeetingVal: hisDetailValue,
@@ -68,12 +71,25 @@
           field: hisDetailValue[1][0]
         },
         currentPage: 1,
-        // TODO 分页大小，可配置？
         pageSize: 10,
         noMoreData: false
       }
     },
     methods: {
+      _onClick(id, isRestricted) {
+        let self = this
+        detailAuthentication(id, isRestricted, {
+          getRestrictedMeeting: function () {
+            return self.restrictedMeeting
+          },
+          routeToDetail: function () {
+            self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+          },
+          setRestrictedMeeting: function (meeting) {
+            self.setRestrictedMeetingList(meeting)
+          }
+        })
+      },
       _searchValChange(index1, index2) {
         let val = hisDetailValue[index1][index2]
         if (index1 === 0) {
@@ -83,6 +99,10 @@
         }
       },
       _getHistoryMeeting(currentPage) {
+        if (this.noMoreData) {
+          this.$refs.scroll.forceUpdate(false)
+          return
+        }
         this.currentPage = currentPage
         const url = getHistoryMeetingUrl
         let params = {
@@ -99,7 +119,6 @@
           .then((res) => {
             let meetingList = []
             for (let meeting of res.list) {
-              // let meetingItem = genMeetingListItem(meeting)
               let meetingItem = new Meeting(meeting)
               meetingList.push(meetingItem)
             }
@@ -107,9 +126,9 @@
             this.noMoreData = meetingList.length < this.pageSize
             // 对上拉下拉的处理
             if (currentPage === 1) {
-              this.$store.commit(SET_HISTORY_MEETING_LIST, meetingList)
+              this.setHistoryMeeting(meetingList)
             } else {
-              this.$store.commit(SET_HISTORY_MEETING_LIST, this.historyMeeting.concat(meetingList))
+              this.setHistoryMeeting(this.historyMeeting.concat(meetingList))
             }
             // TODO mutation state
             console.log('____log______')
@@ -132,11 +151,17 @@
               })
             }
           })
-      }
+      },
+      ...mapMutations({
+        setHistoryMeeting: 'SET_HISTORY_MEETING_LIST',
+        setRestrictedMeetingList: 'SET_RESTRICTED_MEETING_LIST'
+      })
     },
     watch: {
       searchVal: {
         handler(val, oldVal) {
+          this.noMoreData = false
+          this.$refs.scroll.forceUpdate(true)
           this._getHistoryMeeting(1)
         },
         deep: true
@@ -147,6 +172,7 @@
 </script>
 
 <style scoped lang="scss">
+  @import "../../common/scss/variable";
 
   .history-meeting-body {
     display: flex;
@@ -157,11 +183,7 @@
       position: fixed;
       width: 100%;
       top: 44px;
-      z-index: 99;
-    }
-
-    .scroll {
-      height: 620px;
+      z-index: $z-index-level-9;
     }
   }
 </style>

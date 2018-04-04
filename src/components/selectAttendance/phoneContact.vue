@@ -1,25 +1,34 @@
 <template>
   <div class="phone-contact">
-    <contact-list :contactType="contactType.phone"></contact-list>
+    <contact-list :data="phoneContactList"></contact-list>
   </div>
 </template>
 <script type="text/ecmascript-6">
   import ContactList from './contactList/contactList'
-  import { CONTACT_TYPE } from 'api/config'
   import { getPhoneContacts } from 'common/js/utils'
+  import { mapGetters, mapMutations } from 'vuex'
 
   export default {
     components: {
       ContactList
     },
+    computed: {
+      ...mapGetters([
+        'phoneContactList'
+      ])
+    },
     created() {
-      this.contactType = CONTACT_TYPE
       this._getPhoneContact()
     },
     methods: {
-      _getPhoneContact() {
-        getPhoneContacts()
-      }
+      async _getPhoneContact () {
+        let phoneContacts = await getPhoneContacts()
+        console.log('phoneContacts:', phoneContacts)
+        this.setPhoneContactList(phoneContacts)
+      },
+      ...mapMutations({
+        setPhoneContactList: 'SET_PHONE_CONTACT_LIST'
+      })
     }
   }
 </script>

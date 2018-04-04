@@ -19,9 +19,18 @@ Vue.use(Lazyload)
 router.beforeEach((to, from, next) => {
   next(false)
   if (to.meta.requireAuth) {
-    console.log(to.path)
     if (store.getters.sessionid) {
       next()
+    } else {
+      console.log('to:' + to)
+      next({
+        path: '/login',
+        query: {
+          to: to.path.substr(1),
+          meetingId: to.query.meetingId,
+          windsessionid: to.query.windsessionid
+        }
+      })
     }
   } else {
     console.log('no requireAuth')

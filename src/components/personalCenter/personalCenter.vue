@@ -1,35 +1,33 @@
 <template>
   <div class="per-center">
     <div class="scroll-list-wrapper">
-      <mt-loadmore :top-method="_loadTop"
-                   :topPullText="topPullText"
-                   :topDropText="topDropText"
-                   :topLoadingText="topLoadingText"
-                   :topDistance="distance"
-                   :autoFill="false"
-                   ref="loadmore" class="load-more">
-        <per-head :imgUrl="headImg" :userName="name" :inst="inst"></per-head>
-        <router-link tag="div" to="/personalCenter/publishedMeeting">
-          <per-list :iconTypeClass="'icon-qunfenglianxiren'" :listName="'公开会议'" :listNum="personalCenterCount.publishedMeetingCount"
-                    :moreClass="'icon-xiangyou'"></per-list>
-        </router-link>
-        <router-link tag="div" to="/personalCenter/privateMeeting">
-          <per-list :iconTypeClass="'icon-lianxiren'" :listName="'私人会议'" :listNum="personalCenterCount.privateMeetingCount"
-                    :moreClass="'icon-xiangyou'"></per-list>
-        </router-link>
-        <router-link tag="div" to="/personalCenter/myCollection">
-          <per-list :iconTypeClass="'icon-shoucang1'" :listName="'我的收藏'" :listNum="personalCenterCount.myCollectionCount"
-                    :moreClass="'icon-xiangyou'"></per-list>
-        </router-link>
-        <router-link tag="div" to="/personalCenter/latestPlay">
-          <per-list :iconTypeClass="'icon-zaixianhuiyi'" :listName="'最近播放'" :listNum="personalCenterCount.latestPlayCount"
-                    :moreClass="'icon-xiangyou'"></per-list>
-        </router-link>
-        <a @click="_openDownloadPage">
-          <per-list :iconTypeClass="'icon-download'" :listName="'下载管理'" :listNum="personalCenterCount.downloadCount"
-                    :moreClass="'icon-xiangyou'"></per-list>
-        </a>
-      </mt-loadmore>
+      <scroll :data="[]" :pullDownRefresh="true" :pullUpLoad="true"
+              @pullingDown="_getUserInfo()"
+              class="scroll" ref="scroll">
+        <div>
+          <per-head :imgUrl="headImg" :userName="name" :inst="inst"></per-head>
+          <router-link tag="div" to="/personalCenter/publishedMeeting">
+            <per-list :iconTypeClass="'icon-qunfenglianxiren'" :listName=publishedMeeting :listNum="personalCenterCount.publishedMeetingCount"
+                      :moreClass="'icon-xiangyou'"></per-list>
+          </router-link>
+          <router-link tag="div" to="/personalCenter/privateMeeting">
+            <per-list :iconTypeClass="'icon-lianxiren'" :listName=privateMeeting :listNum="personalCenterCount.privateMeetingCount"
+                      :moreClass="'icon-xiangyou'"></per-list>
+          </router-link>
+          <router-link tag="div" to="/personalCenter/myCollection">
+            <per-list :iconTypeClass="'icon-shoucang1'" :listName=myCollection :listNum="personalCenterCount.myCollectionCount"
+                      :moreClass="'icon-xiangyou'"></per-list>
+          </router-link>
+          <router-link tag="div" to="/personalCenter/latestPlay">
+            <per-list :iconTypeClass="'icon-zaixianhuiyi'" :listName=latestPlay :listNum="personalCenterCount.latestPlayCount"
+                      :moreClass="'icon-xiangyou'"></per-list>
+          </router-link>
+          <a @click="_openDownloadPage">
+            <per-list :iconTypeClass="'icon-download'" :listName=download :listNum="personalCenterCount.downloadCount"
+                      :moreClass="'icon-xiangyou'"></per-list>
+          </a>
+        </div>
+      </scroll>
     </div>
   </div>
 </template>
@@ -42,14 +40,15 @@
   import ERR_CODE from '../../api/errorCode'
   import {getDownloadItemCount, openDownloadPage, closeWebView} from '../../api/native'
   import {getLatestPlayArray} from '../../common/js/utils'
-  import {SET_PERSONAL_CENTER_COUNT} from '../../store/mutation-types'
-  import { MessageBox, Loadmore } from 'mint-ui'
+  import { mapGetters, mapMutations } from 'vuex'
+  import Scroll from 'base/scroll/scroll'
+  import { MessageBox } from 'mint-ui'
 
   export default {
     components: {
       perList,
       perHead,
-      'mt-loadmore': Loadmore
+      Scroll
     },
     mounted() {
       this._getUserInfo()
@@ -63,20 +62,21 @@
         noMore: false,
         name: 'null',
         inst: 'null',
-        headImg: localStorage.userHead ? localStorage.userHead : ''
+        headImg: localStorage.userHead ? localStorage.userHead : '',
+        publishedMeeting: '公开会议',
+        privateMeeting: '私人会议',
+        myCollection: '我的收藏',
+        latestPlay: '最近播放',
+        download: '下载管理'
       }
     },
     computed: {
-      personalCenterCount() {
-        return this.$store.getters.personalCenterCount
-      }
+      ...mapGetters({
+        personalCenterCount: 'personalCenterCount',
+        userCrmId: 'userCrmId '
+      })
     },
     methods: {
-      // 触发下拉刷新事件
-      _loadTop() {
-        this._getUserInfo()
-        this.$refs.loadmore.onTopLoaded()
-      },
       _getUserInfo() {
         const url = getUserInfoUrl
         return api.getData(url, 'get')
@@ -86,11 +86,11 @@
             this._getUserHeadPortrait(res.crmId)
             // TODO mutation state
             console.log('res.myMeetingCount' + res.myMeetingCount)
-            this.$store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'publishedMeeting', num: res.myMeetingCount})
-            this.$store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'privateMeeting', num: res.myPrivateMeetingCount})
-            this.$store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'myCollection', num: res.myCollectionCount})
-            this.$store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'latestPlay', num: this._getLatestPlayCount()})
-            this.$store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'download', num: getDownloadItemCount()})
+            this.setPersonalCount({type: 'publishedMeeting', num: res.myMeetingCount})
+            this.setPersonalCount({type: 'privateMeeting', num: res.myPrivateMeetingCount})
+            this.setPersonalCount({type: 'myCollection', num: res.myCollectionCount})
+            this.setPersonalCount({type: 'latestPlay', num: this._getLatestPlayCount()})
+            this.setPersonalCount({type: 'download', num: getDownloadItemCount()})
             console.log('____log______')
           }).catch((e) => {
             console.log(e.response)
@@ -134,22 +134,24 @@
           })
       },
       _getLatestPlayCount() {
-        return getLatestPlayArray().length
+        return getLatestPlayArray(this.userCrmId).length
       },
       _openDownloadPage() {
         openDownloadPage()
-      }
+      },
+      ...mapMutations({
+        setPersonalCount: 'SET_PERSONAL_CENTER_COUNT'
+      })
     }
   }
 
 </script>
 
 <style scoped lang="scss" type="text/scss">
-  $load-more-height: 550px;
   .per-center {
     .scroll-list-wrapper {
-      .load-more {
-        height: $load-more-height;
+      .scroll {
+        height: 520px;
       }
     }
   }

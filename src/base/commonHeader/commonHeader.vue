@@ -1,5 +1,4 @@
 <template>
-  <!--TODO 根据路由和头部渲染对象，条件渲染头部-->
   <div class="common-header">
     <!--左侧返回Btn-->
     <div class="header-left">
@@ -43,34 +42,37 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import { SET_SEARCH_STR, SET_MORE_DETAIL_POPUP, CLEAR_ATTENDANCE_LIST } from '../../store/mutation-types'
+  import { SET_HEADER_SEARCH_STR, TOGGLE_HEADER_MORE_POPUP } from 'store/mutation-types'
+  import { mapGetters, mapMutations } from 'vuex'
+
   export default {
     name: 'commonHeader',
     data() {
       return {
         renderHeader: {
           // 0:none;1:search;2:title
-          'center': 1,
+          center: 1,
           // 0:none;1:create-meeting-btn;2:search-meeting-btn;3:more-info
-          'right': 1,
-          'titleValue': '',
-          'rightValue': '完成'
+          right: 1,
+          titleValue: '',
+          rightValue: '完成'
         },
         searchStr: '',
         hasSelectedAttendance: false
       }
     },
     computed: {
-      attendanceList() {
-        return this.$store.getters.attendanceList
-      }
+      ...mapGetters([
+        'headerSearchStr',
+        'attendanceList'
+      ])
     },
     methods: {
+      ...mapMutations({
+        setHeaderSearchStr: SET_HEADER_SEARCH_STR,
+        toggleHeaderMorePopup: TOGGLE_HEADER_MORE_POPUP
+      }),
       _goBack() {
-        let createMeeting = /^(\/createMeeting)$/
-        if (createMeeting.test(this.$route.path)) {
-          this.$store.commit(CLEAR_ATTENDANCE_LIST)
-        }
         this.$router.back()
       },
       _clickOnSearch() {
@@ -78,14 +80,13 @@
       },
       _searchMeeting() {
         //将搜索字符串存入Vuex
-//        this.$emit('searchMeeting')
-        this.$store.commit(SET_SEARCH_STR, this.searchStr)
+        this.setHeaderSearchStr(this.searchStr)
       },
       _createMeeting() {
         this.$router.push({ path: '/createMeeting' })
       },
       clickOnMoreDetail() {
-        this.$store.commit(SET_MORE_DETAIL_POPUP, true)
+        this.toggleHeaderMorePopup()
       },
       clickOnCompleteBtn() {
         if (!this.hasSelectedAttendance) return
@@ -100,7 +101,7 @@
     // lazy:true,
     watch: {
       //watch路由变化，根据路由渲染common header
-      '$route': {
+      $route: {
         handler: function () {
           //路由变化，清空搜索框
           this.searchStr = ''
@@ -163,15 +164,11 @@
             this.renderHeader.right = 3
             this.renderHeader.titleValue = '详情'
           }
-//          this.searchStr = ''
         },
         // 创建watcher是就执行一次handler方法
         immediate: true
       },
-      '$store.getters.searchStr': function () {
-        this.searchStr = this.$store.getters.searchStr
-      },
-      'attendanceList': {
+      attendanceList: {
         handler: function () {
           let len = this.attendanceList.length
           if (len > 0) {
@@ -183,6 +180,9 @@
           }
         },
         deep: true
+      },
+      headerSearchStr(newVal) {
+        this.searchStr = newVal
       }
     }
   }

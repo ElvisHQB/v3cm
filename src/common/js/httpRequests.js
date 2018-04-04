@@ -1,18 +1,10 @@
 // 取消收藏
 import api from '../../api/fetchData'
-import {bookMarkMeeting, isCrmRestrictedForMeeting, getRecordUrl, getDocumentUrl, HOST, addUserLogOfPlayFailed, getMeetingPlaybackUrl} from '../../api/config'
-import {BOOK_MARK_MY_COLLOCTION, SET_CURRENT_PLAY_MEETING, SET_PERSONAL_CENTER_COUNT, SET_RESTRICTED_MEETING_LIST} from '../../store/mutation-types'
+import {bookMarkMeeting, isCrmRestrictedForMeeting, getRecordUrl, getDocumentUrl, addUserLogOfPlayFailed, getMeetingPlaybackUrl} from '../../api/config'
 import ERR_CODE from '../../api/errorCode'
 import store from '../../store'
-import {Toast, MessageBox} from 'mint-ui'
-import { addDownloadItem, pdfReader, playMedia, registerMediaPlayerErrorCode, stopMedia, openWebView } from '../../api/native'
-import { getLatestPlayArray, addToLatestPlay } from './utils'
+import {MessageBox} from 'mint-ui'
 
-const playMediaType = {
-  float: 1, //悬浮
-  history: 2, //历史会议播放
-  live: 3 //直播会议
-}
 // 原生播放器错误类型
 const mediaPlayErrorCallback = {
   'Android': {
@@ -76,9 +68,6 @@ const mediaPlayErrorCallback = {
   }
 }
 
-// 视频点播地址
-const VOD_ADDR = 'http://wind.gensee.com/webcast/site/vod/play-'
-
 export const bookmarkMeeting = (meetingId, bookmarked) => {
   let url = bookMarkMeeting
   let params = {
@@ -86,39 +75,21 @@ export const bookmarkMeeting = (meetingId, bookmarked) => {
     bookmarked: bookmarked
   }
   return api.getData(url, 'get', {params: params})
-    .then((res) => {
-      if (res < 1) {
-        Toast('操作失败！')
-        return
-      }
-      if (bookmarked) {
-        Toast({
-          message: '取消收藏成功！',
-          position: 'bottom',
-          duration: 800
-        })
-        store.commit(BOOK_MARK_MY_COLLOCTION, meetingId)
-      }
-      // TODO mutation state
-    }).catch((e) => {
-      console.log(e)
-    })
 }
 
 //行业鉴权
-export const detailAuthentication = (id, isRestricted, self) => {
+export const detailAuthentication = (id, isRestricted, fnObj) => {
   if (isRestricted === 'restricted') {
-    let restrictedMeetingList = store.getters.restrictedMeetingList
+    let restrictedMeetingList = fnObj.getRestrictedMeeting()
     let isExist = false
     for (let meeting of restrictedMeetingList) {
       if (meeting.meetingId === id) {
+        isExist = true
         if (meeting.restrictedMsg === 'NON_RESTRICTED') {
-          isExist = true
-          self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+          fnObj.routeToDetail()
           break
         } else {
           MessageBox.alert(meeting.restrictedMsg)
-          isExist = true
           break
         }
       }
@@ -133,70 +104,21 @@ export const detailAuthentication = (id, isRestricted, self) => {
       return api.getData(url, 'get', {params: params})
         .then((res) => {
           restrictedMeeting.restrictedMsg = res
-          store.commit(SET_RESTRICTED_MEETING_LIST, restrictedMeeting)
+          fnObj.setRestrictedMeeting(restrictedMeeting)
           if (res === 'INDUSTRY_RESTRICTED') {
             MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
           } else if (res === 'WHITE_LIST_RESTRICTED') {
             MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
           } else if (res === 'NON_RESTRICTED') {
-            self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+            fnObj.routeToDetail()
           }
-          // TODO mutation state
         }).catch((e) => {
           console.log(e)
         })
     }
   } else {
-    self.$router.push({name: 'meetingDetail', params: {meetingId: id}})
+    fnObj.routeToDetail()
   }
-}
-
-//下载录音，调用原生
-export const getAudioUrl = (id, audioId, title, isDownLoad, self, item) => {
-  const url = getRecordUrl
-  let params = {
-    meetingId: id,
-    audioId: audioId
-  }
-  return api.getData(url, 'get', { params: params, responseType: 'text' })
-    .then((res) => {
-      const audioUrl = res.trim()
-      //TODO
-      const detailPageUrl = ''
-      console.log(audioUrl)
-      // TODO
-      if (audioUrl) {
-        if (isDownLoad) {
-          addDownloadItem(title, audioUrl, self.$store.getters.serverInfo + detailPageUrl)
-        } else {
-          playMedia(title, audioUrl, self.$store.getters.serverInfo + detailPageUrl, playMediaType.float)
-          //播放错误回调
-          registerMediaPlayerErrorCode(registerMediaPlayerErrorCodeCallBack.name)
-          store.commit(SET_CURRENT_PLAY_MEETING, item)
-          //添加到最近播放
-          let latestPlayArray = getLatestPlayArray()
-          addToLatestPlay(latestPlayArray, item)
-          store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'latestPlay', num: getLatestPlayArray().length})
-        }
-      }
-    })
-    .catch((e) => {
-      console.log(e.response)
-      let response = e.response.data ? e.response.data : false
-      if (response && response.errorMsg) {
-        if (response.errorCode === ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.CODE) {
-          MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
-        } else if (response.errorCode === ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.CODE) {
-          MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
-        }
-      } else {
-        Toast({
-          message: ERR_CODE.SERVER_ERROR.MSG,
-          position: 'bottom',
-          duration: 800
-        })
-      }
-    })
 }
 
 // 直播错误回调
@@ -248,84 +170,30 @@ export const addMediaPlayErrorToLog = (playErrContent) => {
 }
 
 //pdf
-export const getDocument = (id, pdfId, title, self) => {
-  const url = getDocumentUrl
-  let params = {
-    documentId: pdfId,
-    documentType: 'SHORTHAND'
+export const getDocument = (documentId, documentType, meetingId) => {
+  let url = ''
+  let params = {}
+  if (documentType === 'AUDIO') {
+    url = getRecordUrl
+    params = {
+      audioId: documentId,
+      meetingId: meetingId
+    }
+  } else {
+    url = getDocumentUrl
+    params = {
+      documentId: documentId,
+      documentType: documentType
+    }
   }
   return api.getData(url, 'get', { params: params, responseType: 'text' })
-    .then((res) => {
-      const documentUrl = res
-      console.log(documentUrl)
-      // TODO
-      if (documentUrl) {
-        let url = self.$store.getters.serverInfo + HOST + documentUrl.trim()
-        pdfReader(title, url)
-      }
-    })
-    .catch((e) => {
-      console.log(e.response)
-      let response = e.response.data ? e.response.data : false
-      if (response && response.errorMsg) {
-        if (response.errorCode === ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.CODE) {
-          MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
-        } else if (response.errorCode === ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.CODE) {
-          MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
-        }
-      } else {
-        Toast({
-          message: ERR_CODE.SERVER_ERROR.MSG,
-          position: 'bottom',
-          duration: 800
-        })
-      }
-    })
 }
 
 //获取视频回放
-export const getMeetingPlayback = (item) => {
+export const getMeetingPlayback = (id) => {
   const url = getMeetingPlaybackUrl
   let params = {
-    meetingId: item.id
+    meetingId: id
   }
   return api.getData(url, 'get', { params: params })
-    .then((res) => {
-      const videoUrl = res
-      console.log(videoUrl)
-      if (videoUrl) {
-        stopMedia()
-        // TODO url拼接
-        //通过WebView在APP打开网页页面
-        let url = VOD_ADDR + videoUrl.trim()
-        openWebView(true, item.title, url, true)
-        //添加到最近播放
-        let latestPlayArray = getLatestPlayArray()
-        addToLatestPlay(latestPlayArray, item)
-        store.commit(SET_PERSONAL_CENTER_COUNT, {type: 'latestPlay', num: getLatestPlayArray().length + 1})
-      } else {
-        Toast({
-          message: '回播码错误，请联系运营人员!',
-          position: 'bottom',
-          duration: 800
-        })
-      }
-    })
-    .catch((e) => {
-      console.log(e.response)
-      let response = e.response.data ? e.response.data : false
-      if (response && response.errorMsg) {
-        if (response.errorCode === ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.CODE) {
-          MessageBox.alert(ERR_CODE.SIGNUP_INDUSTRY_RESTRICTED.MSG)
-        } else if (response.errorCode === ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.CODE) {
-          MessageBox.alert(ERR_CODE.SIGNUP_WHITE_LIST_RESTRICTED.MSG)
-        }
-      } else {
-        Toast({
-          message: ERR_CODE.SERVER_ERROR.MSG,
-          position: 'bottom',
-          duration: 800
-        })
-      }
-    })
 }

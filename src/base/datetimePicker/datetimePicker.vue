@@ -1,25 +1,30 @@
 <template>
   <div class="datetime-picker-wrapper">
-    <div class="datetime-picker" v-show="state===1">
-      <div class="picker-header">
-        <button class="btn-cancel" @click="cancel">取消</button>
-        <button class="btn-ok" @click="confirm">确定</button>
-      </div>
-      <div class="picker-title">
-        <span v-for="(item, index) in titleArr" :key="index">{{item}}</span>
-      </div>
-      <div class="picker-body">
-        <div class="mask-top"></div>
-        <div class="mask-bottom"></div>
-        <div class="wheel-wrapper" ref="wheelWrapper">
-          <div :class="[{'wheel-left-border': index === 3}, 'wheel']" v-for="(data, index) in pickerData" :key="index">
-            <ul class="wheel-scroll">
-              <li class="wheel-item" v-for="(item, index) in data" :key="index">{{ filterVal(item) }}</li>
-            </ul>
+    <!--TODO Vue的方式引入animate.css 有问题！-->
+    <transition name="custom-classes-transition"
+      enter-active-class="fadeInUp"
+      leave-active-class="fadeOutDown">
+      <div class="animated datetime-picker" v-show="state===1">
+        <div class="picker-header">
+          <button class="btn-cancel" @click="cancel">{{ cancelBtn }}</button>
+          <button class="btn-ok" @click="confirm">{{ confirmBtn }}</button>
+        </div>
+        <div class="picker-title">
+          <span v-for="(item, index) in titleArr" :key="index">{{item}}</span>
+        </div>
+        <div class="picker-body">
+          <div class="mask-top"></div>
+          <div class="mask-bottom"></div>
+          <div class="wheel-wrapper" ref="wheelWrapper">
+            <div :class="[{'wheel-left-border': index === 3}, 'wheel']" v-for="(data, index) in pickerData" :key="index">
+              <ul class="wheel-scroll">
+                <li class="wheel-item" v-for="(item, index) in data" :key="index">{{ filterVal(item) }}</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </transition>
     <div class="datetime-picker-shadow" v-show="state===1" @click="state = 0"></div>
   </div>
 </template>
@@ -33,6 +38,8 @@
   const STATE_SHOW = 1
   const EVENT_SELECT = 'select'
   const EVENT_CANCEL = 'cancel'
+  const CONFIRM_BTN = '确定'
+  const CANCEL_BTN = '取消'
 
   const TITLE_ARR = ['年', '月', '日', '时', '分']
   const YEARS = [new Date().getFullYear(), new Date().getFullYear() + 1]
@@ -52,14 +59,6 @@
 
   export default {
     name: COMPONENT_NAME,
-    props: {
-      defaultTime: {
-        type: Number,
-        default: function() {
-          return new Date().getTime()
-        }
-      }
-    },
     data() {
       return {
         state: STATE_HIDE,
@@ -68,6 +67,10 @@
         pickerSelectedIndex: [0, 0, 0, 0, 0],
         pickerSelectedVal: []
       }
+    },
+    created() {
+      this.confirmBtn = CONFIRM_BTN
+      this.cancelBtn = CANCEL_BTN
     },
     methods: {
       confirm() {
@@ -93,7 +96,7 @@
         this.$emit(EVENT_CANCEL)
       },
       //调用执行的入口
-      show() {
+      show(defaultTime) {
         if (this.state === STATE_SHOW) {
           return
         }
@@ -105,10 +108,9 @@
             for (let i = 0; i < this.pickerData.length; i++) {
               this._createWheel(wheelWrapper, i)
             }
-            this.dirty = false
           })
           //设置默认时间
-          this.setDatetime(this.defaultTime)
+          this.setDatetime(defaultTime)
         } else {
           for (let i = 0; i < this.pickerData.length; i++) {
             this.wheels[i].enable()
@@ -164,10 +166,6 @@
           return !wheel.isInTransition
         })
       },
-      setData(data) {
-        this.pickerData = data.slice()
-        this.dirty = true
-      },
       setDatetime(timeStamp) {
         let curDate = new Date(timeStamp)
         let yearIndex = YEARS.indexOf(curDate.getFullYear())
@@ -211,6 +209,7 @@
 </script>
 
 <style scoped lang="scss" type="text/scss">
+  @import "../../common/lib/css/animate.min.css";
   @import '../../common/scss/variable.scss';
 
   $picker-background-color: #eee;
@@ -218,6 +217,7 @@
   $header-btn-cancel-color: #555;
   $header-btn-cancel-border-color: #bbb;
   $main-color: #fff;
+  $animation-duration: 0.5s;
 
   .datetime-picker-wrapper {
     .datetime-picker {
@@ -330,9 +330,9 @@
     .datetime-picker-shadow {
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(0, 0, 0, 0.2);
       z-index: 555;
-      opacity: 0.4;
+      opacity: 0.1;
       position: absolute;
       top: 0;
     }

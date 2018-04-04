@@ -7,11 +7,9 @@ import {
   defaultTitle,
   HOST,
   defaultCity
-} from '../../api/config'
-import {SET_LATESTPLAY_MEETING_LIST, SET_PHONE_CONTACT_LIST} from '../../store/mutation-types'
-import store from '../../store'
-import {eventCenter} from '../../api/native'
-import pinyin from '../../common/js/pin-yin'
+} from 'api/config'
+import { eventCenter } from 'api/native'
+import pinyin from '../lib/js/pin-yin'
 
 // 会议对象创建
 export class Meeting {
@@ -27,7 +25,7 @@ export class Meeting {
     this.pdfId = item.pdfId
     this.audioId = item.audioId
     this.meetingStatus = item.meetingStatus
-    this.signunpStatus = item.signupStatus
+    this.signupStatus = item.signupStatus
     this.isRestricted = item.isRestricted ? 'restricted' : 'notRestricted'
   }
 }
@@ -178,7 +176,7 @@ Date.prototype.format = function (fmt) {
 }
 
 //获取最近播放列表
-export const getLatestPlayArray = () => {
+export const getLatestPlayArray = (userCrmId) => {
   let latestPlayArray = []
   // 没有任何相关记录，直接返回空数组
   if (!localStorage.latestPlay) {
@@ -189,8 +187,8 @@ export const getLatestPlayArray = () => {
   let latestPlayJson = JSON.parse(localStorage.latestPlay)
   // 查找匹配记录
   for (let element of latestPlayJson) {
-    console.log(store.getters.userCrmId)
-    if (element.crmId === store.getters.userCrmId) {
+    console.log(userCrmId)
+    if (element.crmId === userCrmId) {
       latestPlayArray = element.latestPlayArray
       break
     }
@@ -199,12 +197,12 @@ export const getLatestPlayArray = () => {
 }
 
 //设置最近播放列表
-export const setLatestPlayArray = (latestPlayArray) => {
+export const setLatestPlayArray = (latestPlayArray, userCrmId) => {
   // 没有任何相关记录，新建一条记录
   if (!localStorage.latestPlay) {
     let latestPlayList = []
     let latestPlayListItem = {}
-    latestPlayListItem.crmId = store.getters.userCrmId
+    latestPlayListItem.crmId = userCrmId
     latestPlayListItem.latestPlayArray = latestPlayArray
     latestPlayList.push(latestPlayListItem)
     localStorage.latestPlay = JSON.stringify(latestPlayList)
@@ -215,8 +213,8 @@ export const setLatestPlayArray = (latestPlayArray) => {
   let hasCrmId = false
   // 查找匹配记录
   for (let element of latestPlayJson) {
-    console.log(store.getters.userCrmId)
-    if (element.crmId === store.getters.userCrmId) {
+    console.log(userCrmId)
+    if (element.crmId === userCrmId) {
       element.latestPlayArray = latestPlayArray
       hasCrmId = true
       break
@@ -225,7 +223,7 @@ export const setLatestPlayArray = (latestPlayArray) => {
   // 不包含匹配记录，插入一条记录
   if (!hasCrmId) {
     let latestPlayListItem = {}
-    latestPlayListItem.crmId = store.getters.userCrmId
+    latestPlayListItem.crmId = userCrmId
     latestPlayListItem.latestPlayArray = latestPlayArray
     latestPlayJson.push(latestPlayListItem)
     localStorage.latestPlay = JSON.stringify(latestPlayJson)
@@ -235,7 +233,7 @@ export const setLatestPlayArray = (latestPlayArray) => {
 }
 
 //最近播放去重
-export const addToLatestPlay = (latestPlayArray, item) => {
+export const addToLatestPlay = (latestPlayArray, item, userCrmId) => {
   for (let index in latestPlayArray) {
     if (latestPlayArray[index].id === item.id) {
       latestPlayArray.splice(index, 1)
@@ -246,8 +244,8 @@ export const addToLatestPlay = (latestPlayArray, item) => {
     }
   }
   latestPlayArray.unshift(item)
-  store.commit(SET_LATESTPLAY_MEETING_LIST, latestPlayArray)
-  setLatestPlayArray(latestPlayArray)
+  setLatestPlayArray(latestPlayArray, userCrmId)
+  return latestPlayArray
 }
 
 // 会议详情对象
@@ -294,20 +292,19 @@ export const genCommentItem = item => {
 }
 
 //手机联系人列表
-export const getPhoneContacts = () => {
-  getContacts(genPhoneContactList)
-}
-
-export const getContacts = (callback) => {
-  console.log('call native getContacts', callback.name)
-  eventCenter().getContacts(callback)
+export const getPhoneContacts = async () => {
+  console.log('call native getContacts', genPhoneContactList.name)
+  let phoneContacts = await eventCenter().getContacts(genPhoneContactList)
+  console.log('handled phone contacts:', phoneContacts)
+  return phoneContacts
 }
 
 export const genPhoneContactList = (content) => {
   let contacts = JSON.parse(content)
   console.log(contacts)
-  let phoneContactsList = getGroupContacts(contacts)
-  store.commit(SET_PHONE_CONTACT_LIST, phoneContactsList)
+  let phoneContacts = getGroupContacts(contacts)
+  console.log(phoneContacts)
+  return phoneContacts
 }
 
 export const getGroupContacts = (contactInfos) => {
@@ -350,8 +347,7 @@ export const getGroupContacts = (contactInfos) => {
 }
 
 //iWand联系人列表
-export const genIWandContactList = (userListGroup, userAvatarList) => {
-  let index = 0
+export const genIWindContactList = (userListGroup) => {
   for (let users of userListGroup) {
     let arr = []
     for (let user of users.userList) {
@@ -360,7 +356,7 @@ export const genIWandContactList = (userListGroup, userAvatarList) => {
       u.phoneNum = user.mobilePhone
       u.imId = user.iMID
       u.company = user.company
-      u.avatar = userAvatarList[index++].iconData
+      u.avatar = ''
       arr.push(u)
     }
     users.userList = arr

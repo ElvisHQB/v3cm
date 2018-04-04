@@ -36,8 +36,8 @@
     },
     data() {
       return {
-        'currentCount': 0,
-        'countExceed': false
+        currentCount: 0,
+        countExceed: false
       }
     },
     methods: {
@@ -56,7 +56,7 @@
     },
     watch: {
       clearContent: function () {
-        this.$refs.textarea.innerHTML = ''
+        this.$refs.textarea.innerText = ''
       }
     }
   }

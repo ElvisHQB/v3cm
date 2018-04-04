@@ -15,13 +15,13 @@
     <!--开始时间-->
     <div class="meeting-start-time" @click="_openStartPicker">
       <span>开始时间</span>
-      <span>{{ startTime }}</span>
+      <span>{{ meeting.startTime }}</span>
       <span><i class="icon-xiangyou"></i></span>
     </div>
     <!--结束时间-->
     <div class="meeting-end-time" @click="_openEndPicker">
       <span>结束时间</span>
-      <span>{{ endTime }}</span>
+      <span>{{ meeting.endTime }}</span>
       <span><i class="icon-xiangyou"></i></span>
     </div>
     <!--桌面共享-->
@@ -38,8 +38,8 @@
       </analog-textarea>
     </div>
 
-    <datetime-picker @select="startTimeConfirm" :defaultTime="defaultStartTime" ref="startPicker"></datetime-picker>
-    <datetime-picker @select="endTimeConfirm" :defaultTime="defaultEndTime" ref="endPicker"></datetime-picker>
+    <datetime-picker @select="startTimeConfirm" ref="startPicker"></datetime-picker>
+    <datetime-picker @select="endTimeConfirm" ref="endPicker"></datetime-picker>
 
     <div class="meeting-submit-btn" @click="_clickOnSubmit">
       <span>提交</span>
@@ -54,8 +54,8 @@
   import DatetimePicker from 'base/datetimePicker/datetimePicker'
   import { MessageBox, Toast, Switch } from 'mint-ui'
   import { desktopSharePrompt } from 'api/prompt'
-  import { CLEAR_ATTENDANCE_LIST } from '../../store/mutation-types'
   import { createPrivateMeetingUrl } from 'api/config'
+  import { mapMutations, mapGetters } from 'vuex'
 
   const MEETING_ADVANCE_MINUTES = 15 + 1
   const MEETING_ADVANCE_MILLISECOND = 15 * 60 * 1000
@@ -87,35 +87,32 @@
     created() {
       this.startTimeStamp = null
       this.endTimeStamp = null
+//      this._initCreateMeeting()
     },
     computed: {
-      attendanceList() {
-        return this.$store.getters.attendanceList
-      },
-      startTime() {
-        return this.meeting.startTime || '请选择会议开始时间'
-      },
-      endTime() {
-        return this.meeting.endTime || '请选择会议结束时间'
-      },
-      defaultStartTime() {
-        let date = new Date()
-        date.setMinutes(date.getMinutes() + MEETING_ADVANCE_MINUTES)
-        return date.getTime()
-      },
-      defaultEndTime() {
-        let date = new Date()
-        date.setHours(date.getHours() + 1)
-        date.setMinutes(date.getMinutes() + MEETING_ADVANCE_MINUTES)
-        return date.getTime()
-      }
+      ...mapGetters([
+        'attendanceList'
+      ])
     },
     methods: {
+      ...mapMutations({
+        clearAttendanceList: 'CLEAR_ATTENDANCE_LIST'
+      }),
+      _initCreateMeeting() {
+        let start = new Date()
+        start.setMinutes(start.getMinutes() + MEETING_ADVANCE_MINUTES)
+        this.startTimeConfirm(start.getTime())
+
+        let end = new Date()
+        end.setHours(end.getHours() + 1)
+        end.setMinutes(end.getMinutes() + MEETING_ADVANCE_MINUTES)
+        this.endTimeConfirm(end.getTime())
+      },
       _openStartPicker() {
-        this.$refs.startPicker.show()
+        this.$refs.startPicker.show(this.startTimeStamp)
       },
       _openEndPicker() {
-        this.$refs.endPicker.show()
+        this.$refs.endPicker.show(this.endTimeStamp)
       },
       startTimeConfirm(value) {
         this.startTimeStamp = value
@@ -161,7 +158,7 @@
             this.meeting.description = ''
             this.meeting.user = []
             this.meeting.desktopShare = true
-            this.$store.commit(CLEAR_ATTENDANCE_LIST)
+            this.clearAttendanceList()
             this.$router.push({ path: '/newestMeeting' })
           })
           .catch((e) => {
@@ -170,7 +167,15 @@
           })
       },
       _validateMeeting(meeting) {
-        // TODO
+        if (!meeting.title) {
+          return '请输入会议主题'
+        }
+        if (meeting.title && (meeting.title.length > MEETING_TITLE_LENGTH)) {
+          return '会议主题不超过30字'
+        }
+        if (meeting.user.length === 0) {
+          return '请选择参会人'
+        }
         if (!meeting.startTime) {
           return '请选择会议开始时间'
         }
@@ -184,12 +189,6 @@
           if (this.startTimeStamp > this.endTimeStamp) {
             return '会议开始时间不能大于结束时间'
           }
-        }
-        if (!meeting.title) {
-          return '请输入会议主题'
-        }
-        if (meeting.title && (meeting.title.length > MEETING_TITLE_LENGTH)) {
-          return '会议主题不超过30字'
         }
         if (!meeting.description) {
           return '请输入会议简介'
@@ -211,18 +210,17 @@
         this.clearContent = this.meeting.description.length === 0
       }
     },
-    activated() {
-      //TODO
-      let len = this.attendanceList.length
-      if (len === 0) {
+    activated() { //该钩子在keep-alive激活时调用
+      this._initCreateMeeting()
+      if (this.attendanceList.length === 0) {
         this.attendanceText = '请选择参会人'
       } else {
         this.attendanceText = ''
         for (let u of this.attendanceList) {
-          this.attendanceText += u.name + ','
+          this.attendanceText += u.name + ', '
         }
+        this.attendanceText = this.attendanceText.substring(0, this.attendanceText.lastIndexOf(','))
       }
-      console.log('back to createMeeting...')
     }
   }
 </script>

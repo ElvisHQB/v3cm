@@ -13,10 +13,22 @@
   export default {
     name: 'personal-center-list',
     props: {
-      iconTypeClass: '',
-      listName: '',
-      listNum: '',
-      moreClass: ''
+      iconTypeClass: {
+        type: String,
+        default: ''
+      },
+      listName: {
+        type: String,
+        default: ''
+      },
+      listNum: {
+        type: Number,
+        default: 0
+      },
+      moreClass: {
+        type: String,
+        default: ''
+      }
     },
     data() {
       return {

@@ -1,37 +1,35 @@
 <template>
   <div class="search-wrapper">
     <!--搜索历史-->
-    <div v-if="renderHistory" class="search-history">
+    <div v-show="renderHistory" class="search-history">
       <div class="search-history-title">
-        <span class="icon-xinxi"></span> 历史搜索
+        <span>历史搜索</span>
+        <span @click="_clearHistory">清除</span>
       </div>
       <div class="search-history-items">
-        <span v-for="(item, index) in histories" :key="index" @click="_searchHistory(item)" class="search-history-item">{{ item }}</span>
-      </div>
-      <div class="clear-search-history">
-        <span class="clear-history-button" @click="_clearHistory">清除历史搜索记录</span>
+        <span v-for="(item, index) in histories" :key="index"
+              @click="_searchHistory(item)"
+              class="search-history-item">
+          {{ item }}
+        </span>
       </div>
     </div>
     <!--搜索结果-->
-    <div v-if="searched" class="search-result">
+    <div v-show="searched" class="search-result">
       <!--搜索结果列表-->
-      <div v-if="hasResult">
+      <div v-show="hasResult">
         <!--搜索结果列表-->
-        <!--<scroll-list :listData="searchMeeting" :noMore="noMoreData"-->
-                     <!--v-on:loadTop="_searchMeeting(searchStr, firstPage, pageSize)"-->
-                     <!--v-on:loadBottom="_searchMeeting(searchStr, currentPage + 1, pageSize)">-->
-        <!--</scroll-list>-->
-        <scroll :data="searchMeeting" :pullDownRefresh="pullDownRefresh" :pullUpLoad="pullUpLoad" :bounce="true"
-                @pullingDown="_searchMeeting(searchStr, firstPage, pageSize)"
-                @pullingUp="_searchMeeting(searchStr, currentPage + 1, pageSize)"
-                class="scroll" ref="scroll">
+        <scroll :data="searchMeetingList" :pullDownRefresh="true" :pullUpLoad="true"
+                @pullingDown="_searchMeeting(searchStr, 1)"
+                @pullingUp="_searchMeeting(searchStr, currentPage + 1)"
+                :style="scrollStyle" ref="scroll">
           <div>
-            <list-view :item="item" v-for="(item, index) in searchMeeting" :key="index"></list-view>
+            <list-view :item="item" v-for="(item, index) in searchMeetingList" :key="index"></list-view>
           </div>
         </scroll>
       </div>
       <!--无结果的空列表-->
-      <div class="empty-result-list" v-else>
+      <div class="empty-result-list" v-show="!hasResult">
         <span>没有搜索到相关会议</span>
       </div>
     </div>
@@ -41,41 +39,39 @@
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import ListView from 'base/listView/listView'
-  import { searchMeetingUrl } from 'api/config'
+  import { searchMeetingUrl, HEADER_HEIGHT } from 'api/config'
   import api from 'api/fetchData'
-  import { SET_SEARCH_MEETING_LIST, SET_SEARCH_STR } from '../../store/mutation-types'
   import { Meeting } from 'common/js/utils'
+  import { mapGetters, mapMutations } from 'vuex'
+
+  const COMPONENT_NAME = 'search'
 
   export default {
-    name: 'search',
+    name: COMPONENT_NAME,
     components: {
       Scroll,
       ListView
     },
     data() {
       return {
-        pullDownRefresh: {
-          threshold: 50,
-          stop: 40
-        },
-        pullUpLoad: {
-          threshold: 50
-        },
         histories: [],
         // 是否进行的搜索动作
         searched: false,
         hasResult: true,
-        pageSize: 10,
-        firstPage: 1,
         currentPage: 1,
         noMoreData: false,
-        searchStr: ''
+        searchStr: '',
+        searchMeetingList: []
       }
     },
     created() {
-      this._initSearchHistory()
+      this._initSearch()
     },
     computed: {
+      ...mapGetters([
+        'headerSearchStr',
+        'appInfo'
+      ]),
       // 搜索历史不为空且还没进行搜索，渲染显示搜索历史
       renderHistory() {
         return (this.histories.length > 0) && (!this.searched)
@@ -83,20 +79,24 @@
       noMore() {
         return this.hasResult && this.noMoreData
       },
-      searchMeeting() {
-        return this.$store.getters.searchMeetingList
+      scrollStyle() {
+        const scrollHeight = this.appInfo.height - HEADER_HEIGHT
+        return 'height:' + scrollHeight + 'px'
       }
     },
     methods: {
-      _initSearchHistory() {
+      ...mapMutations({
+        setHeaderSearchStr: 'SET_HEADER_SEARCH_STR'
+      }),
+      _initSearch() {
         this.searched = false
         this.hasResult = true
         this.noMoreData = false
+        this.searchMeetingList = []
         this._getHistory()
       },
       //获取搜索历史
       _getHistory() {
-        //
         let val = JSON.parse(localStorage.getItem('searchHistory'))
         this.histories = (val === null) ? [] : val
       },
@@ -112,7 +112,6 @@
             arr.push(item)
           }
         }
-        this.histories = arr
         localStorage.setItem('searchHistory', JSON.stringify(this.histories))
       },
       //清除搜索历史记录
@@ -122,12 +121,12 @@
       },
       //点击历史搜索进行搜索
       _searchHistory(item) {
-        this.$store.commit(SET_SEARCH_STR, item)
-        this._searchMeeting(item, this.firstPage, this.pageSize)
+        this.setHeaderSearchStr(item)
+        this._searchMeeting(item, 1)
       },
       //搜索会议
-      _searchMeeting(searchStr, currentPage, pageSize) {
-        if (this.noMoreData) {
+      _searchMeeting(searchStr, currentPage) {
+        if (this.noMore) {
           this.$refs.scroll.forceUpdate(false)
           return
         }
@@ -136,31 +135,29 @@
         this._setHistory(searchStr)
         const url = searchMeetingUrl
         let params = {
-          'criteria': {
-            'category': [],
-            'field': [],
-            'lecturer': searchStr,
-            'name': searchStr,
-            'sponsor': searchStr
+          criteria: {
+            category: [],
+            field: [],
+            lecturer: searchStr,
+            name: searchStr,
+            sponsor: searchStr
           },
-          'isPaging': true,
-          'pageSize': pageSize,
-          'currentPage': currentPage
+          isPaging: true,
+          pageSize: 10,
+          currentPage: currentPage
         }
         api.getData(url, 'post', params)
           .then((res) => {
-            if (res.count <= 0) {
-              this.hasResult = false
-            }
+            this.hasResult = res.count > 0
             let meetingList = []
             for (let meeting of res.list) {
               meetingList.push(new Meeting(meeting))
             }
-            this.noMoreData = meetingList.length < pageSize
+            this.noMoreData = meetingList.length < 10
             if (currentPage === 1) {
-              this.$store.commit(SET_SEARCH_MEETING_LIST, meetingList)
+              this.searchMeetingList = meetingList
             } else {
-              this.$store.commit(SET_SEARCH_MEETING_LIST, this.searchMeeting.concat(meetingList))
+              this.searchMeetingList.concat(meetingList)
             }
           }).catch((e) => {
             console.log(e)
@@ -168,15 +165,14 @@
       }
     },
     watch: {
-      //搜索字符串变化，调用搜索
-      '$store.getters.searchStr': function () {
-        this.searchStr = this.$store.getters.searchStr
-        this._searchMeeting(this.searchStr, 1, this.pageSize)
+      headerSearchStr(newVal) {
+        this.searchStr = newVal
+        this._searchMeeting(newVal, 1)
       }
     },
     // keep alive会通过将实例在activated和deactivated中切换来缓存组件的Vue实例，而不会销毁。
     activated () {
-      this._initSearchHistory()
+      this._initSearch()
     }
   }
 </script>
@@ -193,49 +189,46 @@
       display: flex;
       flex-direction: column;
       .search-history-title {
-        margin: 10px;
-        color: $color-background;
-        font-size: $font-size-large;
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 5px;
+        color: #aaa;
+        span {
+          padding: 5px 10px;
+        }
+        span:nth-child(2) {
+          color: #dd2637;
+          opacity: 0.8;
+        }
       }
       .search-history-items {
         background-color: $search-history-items-color;
+        padding: 0 5px;
+        max-height: 160px;
+        overflow: hidden;
         .search-history-item {
           display: inline-block;
-          padding: 5px;
+          padding: 4px 6px;
           border: 1px solid $search-history-item-color;
           border-radius: 4px;
-          height: 22px;
-          line-height: 22px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          width: 80px;
-          margin: 10px 16px;
-          text-align: center;
-        }
-      }
-      .clear-search-history {
-        display: flex;
-        justify-content: center;
-        .clear-history-button {
-          border: 1px solid;
-          padding: 4px 8px;
-          border-radius: 4px;
-          color: $clear-history-button-color;
+          max-width: 120px;
+          margin: 4px 6px;
+          height: 20px;
+          line-height: 20px;
         }
       }
     }
     .search-result {
-      .scroll {
-        height: 620px;
-      }
       .empty-result-list {
         font-size: $font-size-medium-x;
         color: $empty-result-list-color;
         display: flex;
         justify-content: center;
         justify-items: center;
-        margin: 20px 0;
+        margin-top: 20px;
       }
     }
   }

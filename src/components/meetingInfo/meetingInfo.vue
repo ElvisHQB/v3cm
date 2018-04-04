@@ -4,44 +4,30 @@
       <selector :title="meetingInfoTitle" :subTitle="meetingInfoSubTitle" :selectorVal="meetingInfoVal"
                 @searchVal="_searchValChange"></selector>
     </div>
-    <div class="scroll-list-wrapper">
-      <mt-loadmore :top-method="_loadTop"
-                   :topPullText="topPullText"
-                   :topDropText="topDropText"
-                   :topLoadingText="topLoadingText"
-                   :topDistance="distance"
-                   :bottom-method="_loadBottom"
-                   :bottomAllLoaded="allLoaded"
-                   :autoFill="false"
-                   :bottomLoadingText="bottomLoadingText"
-                   :bottomDistance="distance"
-                   ref="loadmore">
-        <!--会议资讯列表-->
-        <div v-for="(item, index) in meetingInfo" :key="index">
-          <meeting-info-list :item="item"></meeting-info-list>
-        </div>
-      </mt-loadmore>
-      <!--底部无更多数据-->
-      <div v-show="noMore" class="pull-bottom-wrapper">
-        <div class="pull-bottom">
-          <span>没有更多数据了</span>
-        </div>
+    <scroll :data="meetingInfo" :pullDownRefresh="true" :pullUpLoad="true"
+            @pullingDown="_getMeetingInfo(1)"
+            @pullingUp="_getMeetingInfo(currentPage + 1)"
+            :style="scrollStyle" ref="scroll">
+      <div>
+        <meeting-info-list :item="item" v-for="(item, index) in meetingInfo" :key="index">
+        </meeting-info-list>
       </div>
-    </div>
+    </scroll>
   </div>
 
 </template>
 
 <script type="text/ecmascript-6">
-  import selector from '../../base/selector/selector'
+  import selector from 'base/selector/selector'
+  import Scroll from 'base/scroll/scroll'
   import meetingInfoList from './meetingInfoList'
-  import {MeetingInfo} from '../../common/js/utils'
-  import {getOfflineMeetingListUrl} from '../../api/config'
-  import api from '../../api/fetchData'
-  import ERR_CODE from '../../api/errorCode'
-  import {closeWebView} from '../../api/native'
-  import {SET_MEETINGINFO_LIST} from '../../store/mutation-types'
-  import {MessageBox, Loadmore} from 'mint-ui'
+  import { MeetingInfo } from 'common/js/utils'
+  import { getOfflineMeetingListUrl, HEADER_HEIGHT, TAB_HEIGHT, SELECTOR_HEIGHT } from 'api/config'
+  import api from 'api/fetchData'
+  import ERR_CODE from 'api/errorCode'
+  import { closeWebView } from 'api/native'
+  import { mapGetters, mapMutations } from 'vuex'
+  import { MessageBox } from 'mint-ui'
 
   const meetingInfoCategory = ['类型', '地点', '时间']
   const meetingInfoDetail = [['全部', '宏观经济', '高峰论坛', '行业会议', '业绩发布会', '学术会议', '其他会议'],
@@ -56,7 +42,7 @@
     components: {
       selector,
       meetingInfoList,
-      'mt-loadmore': Loadmore
+      Scroll
     },
     mounted() {
       let startTime = new Date()
@@ -66,8 +52,13 @@
       this._getMeetingInfo(1)
     },
     computed: {
-      meetingInfo() {
-        return this.$store.getters.meetingInfoList
+      ...mapGetters({
+        meetingInfo: 'meetingInfoList',
+        appInfo: 'appInfo'
+      }),
+      scrollStyle() {
+        const scrollHeight = this.appInfo.height - HEADER_HEIGHT - TAB_HEIGHT - SELECTOR_HEIGHT
+        return 'height:' + scrollHeight + 'px'
       }
     },
     data() {
@@ -75,15 +66,8 @@
         meetingInfoTitle: meetingInfoCategory,
         meetingInfoSubTitle: meetingInfoDetail,
         meetingInfoVal: meetingInfoValue,
-        topPullText: '下拉可以刷新',
-        topDropText: '释放立即刷新',
-        topLoadingText: '正在刷新...',
-        distance: 50,
-        allLoaded: false,
-        bottomLoadingText: '正在加载...',
-        noMore: false,
         currentPage: 1,
-        // TODO 分页大小，可配置？
+        noMoreData: false,
         pageSize: 10,
         searchVal: {
           city: '',
@@ -129,19 +113,12 @@
         }
         console.log(this.searchVal)
       },
-      // 触发下拉刷新事件
-      _loadTop() {
-        this._getMeetingInfo(1)
-        this.$refs.loadmore.onTopLoaded()
-      },
-      // 触发上拉加载事件
-      _loadBottom() {
-        this._getMeetingInfo(this.currentPage + 1)
-        this.allLoaded = false
-        this.$refs.loadmore.onBottomLoaded()
-      },
       // 获取会议资讯列表
       _getMeetingInfo(currentPage) {
+        if (this.noMoreData) {
+          this.$refs.scroll.forceUpdate(false)
+          return
+        }
         this.currentPage = currentPage
         const url = getOfflineMeetingListUrl
         let params = {
@@ -164,16 +141,12 @@
               meetingList.push(meetingItem)
             }
             // 没有更多数据
-            if (meetingList.length < this.pageSize) {
-              this.noMore = true
-            } else {
-              this.noMore = false
-            }
+            this.noMoreData = meetingList.length < this.pageSize
             // 对上拉下拉的处理
             if (currentPage === 1) {
-              this.$store.commit(SET_MEETINGINFO_LIST, meetingList)
+              this.setMeetingInfo(meetingList)
             } else {
-              this.$store.commit(SET_MEETINGINFO_LIST, this.meetingInfo.concat(meetingList))
+              this.setMeetingInfo(this.meetingInfo.concat(meetingList))
             }
             // TODO mutation state
             console.log('____log______')
@@ -196,11 +169,16 @@
               })
             }
           })
-      }
+      },
+      ...mapMutations({
+        setMeetingInfo: 'SET_MEETINGINFO_LIST'
+      })
     },
     watch: {
       searchVal: {
         handler(val, oldVal) {
+          this.noMoreData = false
+          this.$refs.scroll.forceUpdate(true)
           this._getMeetingInfo(1)
         },
         deep: true
@@ -225,20 +203,7 @@
       position: fixed;
       width: 100%;
       top: 44px;
-      z-index: 99;
-    }
-
-    .pull-bottom-wrapper {
-      height: $pull-buttom-height;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      .pull-bottom {
-        height: $pull-buttom-text-height;
-        line-height: $pull-buttom-text-height;
-        font-size: $font-size-medium;
-        color: $pull-buttom-text-color;
-      }
+      z-index: $z-index-level-9;
     }
   }
 </style>

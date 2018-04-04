@@ -3,13 +3,13 @@
     <!--开始时间-->
     <div class="meeting-start-time" @click="_openStartPicker">
       <span>开始时间</span>
-      <span>{{ startTime }}</span>
+      <span>{{ meeting.startTime }}</span>
       <span><i class="icon-xiangyou"></i></span>
     </div>
     <!--结束时间-->
     <div class="meeting-end-time" @click="_openEndPicker">
       <span>结束时间</span>
-      <span>{{ endTime }}</span>
+      <span>{{ meeting.endTime }}</span>
       <span><i class="icon-xiangyou"></i></span>
     </div>
     <!--会议主题-->
@@ -20,13 +20,17 @@
     </div>
     <!--会议简介-->
     <div class="meeting-description">
-      <analog-textarea :maxCount="1000" :message="'会议简介最多1000字'" :placeholderText="'请输入会议简介，不超过1000字'"
-                       :class="'meeting-textarea'" :clearContent="clearContent" @contentChange="_handleContentChange">
+      <analog-textarea :maxCount="1000"
+                       :message="'会议简介最多1000字'"
+                       :placeholderText="'请输入会议简介，不超过1000字'"
+                       :class="'meeting-textarea'"
+                       :clearContent="clearContent"
+                       @contentChange="_handleContentChange">
       </analog-textarea>
     </div>
 
-    <datetime-picker @select="startTimeConfirm" :defaultTime="defaultStartTime" ref="startPicker"></datetime-picker>
-    <datetime-picker @select="endTimeConfirm" :defaultTime="defaultEndTime" ref="endPicker"></datetime-picker>
+    <datetime-picker @select="startTimeConfirm" ref="startPicker"></datetime-picker>
+    <datetime-picker @select="endTimeConfirm" ref="endPicker"></datetime-picker>
 
     <div class="meeting-submit-btn" @click="_clickOnSubmit">
       <span>提交</span>
@@ -67,32 +71,27 @@
     created() {
       this.startTimeStamp = null
       this.endTimeStamp = null
+//      this._initCreateMeeting()
     },
-    computed: {
-      startTime() {
-        return this.meeting.startTime || '请选择会议开始时间'
-      },
-      endTime() {
-        return this.meeting.endTime || '请选择会议结束时间'
-      },
-      defaultStartTime() {
-        let date = new Date()
-        date.setMinutes(date.getMinutes() + MEETING_ADVANCE_MINUTES)
-        return date.getTime()
-      },
-      defaultEndTime() {
-        let date = new Date()
-        date.setHours(date.getHours() + 1)
-        date.setMinutes(date.getMinutes() + MEETING_ADVANCE_MINUTES)
-        return date.getTime()
-      }
+    activated() {
+      this._initCreateMeeting()
     },
     methods: {
+      _initCreateMeeting() {
+        let start = new Date()
+        start.setMinutes(start.getMinutes() + MEETING_ADVANCE_MINUTES)
+        this.startTimeConfirm(start.getTime())
+
+        let end = new Date()
+        end.setHours(end.getHours() + 1)
+        end.setMinutes(end.getMinutes() + MEETING_ADVANCE_MINUTES)
+        this.endTimeConfirm(end.getTime())
+      },
       _openStartPicker() {
-        this.$refs.startPicker.show()
+        this.$refs.startPicker.show(this.startTimeStamp)
       },
       _openEndPicker() {
-        this.$refs.endPicker.show()
+        this.$refs.endPicker.show(this.endTimeStamp)
       },
       startTimeConfirm(value) {
         this.startTimeStamp = value

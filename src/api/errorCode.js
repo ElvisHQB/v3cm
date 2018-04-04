@@ -52,5 +52,8 @@ export default {
   WHITE_LIST_RESTRICTED: {
     CODE: 'WHITE_LIST_RESTRICTED',
       MSG: '您不在此主办方的邀请名单之中，如仍想参与直播会议，请联系3C小秘书或者拨打：025-68673555转0'
+  },
+  NO_SESSIONID: {
+    MSG: '您尚未登录，请先退出3C会议页面进行登录！'
   }
 }

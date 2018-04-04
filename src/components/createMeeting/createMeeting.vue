@@ -2,6 +2,11 @@
   <div class="create-meeting">
     <tab-select :tabList="tabList" :tabIndex="tabIndex" @changeTab="_changeTab">
       <keep-alive>
+        <!--<transition name="custom-classes-transition"-->
+                    <!--enter-active-class="fadeIn"-->
+                    <!--leave-aactive-class="fadeout">-->
+          <!--<component :is="currentContent" class="animated"></component>-->
+        <!--</transition>-->
         <component :is="currentContent"></component>
       </keep-alive>
     </tab-select>
@@ -48,5 +53,5 @@
 </script>
 
 <style scoped lang="scss" type="text/scss">
-
+  @import "../../common/lib/css/animate.min.css";
 </style>

@@ -1,10 +1,9 @@
 <template>
   <div class="tab-select">
     <div class="tab-bar">
-      <div class="tab-bar-nav">
-        <div class="tab-item" v-for="(tab, index) in tabList" :class="[tabIndex === tab.index ? 'active' : '']"
-          v-bind:key="index" @click="changeTab(tab)">{{ tab.name }}</div>
-      </div>
+      <div class="tab-item" v-for="(tab, index) in tabList" :key="index"
+           :class="[tabIndex === tab.index ? 'active' : '']"
+           @click="changeTab(tab)">{{ tab.name }}</div>
     </div>
     <div class="tab-content">
       <slot></slot>
@@ -13,8 +12,11 @@
 </template>
 
 <script type="text/ecmascript-6">
+  const COMPONENT_NAME = 'tabSelect'
+  const CHANGE_TAB_EVENT = 'changeTab'
+
   export default {
-    name: 'tabSelect',
+    name: COMPONENT_NAME,
     props: {
       tabList: {
         type: Array,
@@ -32,7 +34,7 @@
     },
     methods: {
       changeTab: function (tab) {
-        this.$emit('changeTab', tab)
+        this.$emit(CHANGE_TAB_EVENT, tab)
       }
     }
   }
@@ -48,22 +50,20 @@
   .tab-select {
     flex-direction: column;
     .tab-bar {
-      .tab-bar-nav {
-        display: flex;
-        .tab-item  {
-          flex: 1;
-          text-align: center;
-          line-height: $tab-item-height;
-          height: $tab-item-height;
-          color: $tab-item-default-color;
-          border-bottom: 3px solid $background-color;
-          font-size: $font-size-medium-x;
-          background-color: $background-color;
-        }
-        .active {
-          color: $tab-item-active-color;
-          border-bottom: 3px solid $tab-item-border-color;
-        }
+      display: flex;
+      .tab-item  {
+        flex: 1;
+        text-align: center;
+        line-height: $tab-item-height;
+        height: $tab-item-height;
+        color: $tab-item-default-color;
+        border-bottom: 2px solid $background-color;
+        font-size: $font-size-medium-x;
+        background-color: $background-color;
+      }
+      .active {
+        color: $tab-item-active-color;
+        border-bottom: 2px solid $tab-item-border-color;
       }
     }
   }

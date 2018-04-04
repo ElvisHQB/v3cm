@@ -84,12 +84,12 @@ export const eventCenter = () => {
         top.wdobject.getContacts(id)
       } else {
         let content = JSON.stringify(CONTACTS)
-        func(content)
+        return func(content)
       }
     },
     getContactsCallback: function (id, content) {
       window.setTimeout(function () {
-        center[id](content)
+        return center[id](content)
       }, 0)
     },
     /////////////////////////////// 分享 //////////////////////////////////
@@ -399,17 +399,17 @@ export const pdfReader = (title, url) => {
  * params = {'operate':'getsessionid'}
  * shell_Req(params)
  */
-// function getSessionId() {
-//   console.log('call native getSessionId')
-//   if (top.wdobject) {
-//     var params = {
-//       'operate': 'getsessionid',
-//     }
-//     return top.wdobject.shell_Req(JSON.stringify(params))
-//   } else {
-//     return null
-//   }
-// }
+export const getSessionId = () => {
+  console.log('call native getSessionId')
+  if (top.wdobject) {
+    var params = {
+      'operate': 'getsessionid'
+    }
+    return top.wdobject.shell_Req(JSON.stringify(params))
+  } else {
+    return null
+  }
+}
 
 /**
  * 功能点

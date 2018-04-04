@@ -15,7 +15,12 @@
   export default {
     name: 'private-meeting-list',
     props: {
-      item: ''
+      item: {
+        type: Object,
+        default: function () {
+          return {}
+        }
+      }
     }
   }
 </script>
